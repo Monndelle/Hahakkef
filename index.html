@@ -3,51 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESC Scoreboard Pro V3</title>
+    <title>ESC Pro Manager V3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --blue: #0a1931; --gold: #c8a45e; --grad: linear-gradient(90deg, #0a1931 0%, #185adb 100%); }
-        body { background: #050a18; color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; }
+        :root { --blue: linear-gradient(90deg, #0a1931 0%, #185adb 100%); --gold: #c8a45e; }
+        body { background: #050a18; color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         .view { display: none; padding: 15px; flex-direction: column; align-items: center; }
         .active { display: flex; }
+        .app-header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Header & Banner */
-        .app-header { background: black; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
-        .user-banner { width: 100%; max-width: 500px; background: black; display: flex; align-items: center; padding: 10px; margin-bottom: 15px; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); }
-        .user-logo { width: 45px; height: 45px; background: #e60000; color: white; border-radius: 5px; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; text-align: center; margin-right: 15px; }
-
-        /* Eingabe-Panel (Der Kern!) */
-        .input-panel { background: #111; padding: 15px; width: 100%; max-width: 480px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
-        input, button { padding: 12px; border-radius: 5px; border: none; }
-        input { background: #222; color: white; border: 1px solid #444; }
-        .btn-main { background: var(--gold); color: black; font-weight: bold; cursor: pointer; }
-
-        /* Listen Styling */
-        #ranking-list, #final-list { list-style: none; padding: 0; width: 100%; max-width: 500px; }
-        .item-container { position: relative; margin-bottom: 8px; }
-        .item { background: var(--grad); display: flex; align-items: center; height: 90px; position: relative; z-index: 2; transition: 0.3s; }
-        .item.slid { transform: translateX(-80px); }
-        .edit-side { position: absolute; right: 0; top: 0; height: 100%; width: 80px; background: var(--gold); color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-
-        /* Rauten-Flaggen */
+        /* Diamond Flags */
         .diamond { width: 50px; height: 50px; background: #333; transform: rotate(45deg); overflow: hidden; border: 2px solid #666; margin-left: 15px; flex-shrink: 0; }
         .diamond img { width: 150%; height: 150%; transform: rotate(-45deg); object-fit: cover; }
 
-        .info { flex-grow: 1; margin-left: 25px; }
-        .info b { display: block; text-transform: uppercase; color: var(--gold); letter-spacing: 1px; }
-        .info span { font-size: 0.85rem; opacity: 0.8; }
+        .item-container { position: relative; margin-bottom: 8px; overflow: hidden; border-radius: 5px; width: 100%; max-width: 500px; }
+        .edit-btn { position: absolute; right: 0; top: 0; height: 100%; width: 80px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; z-index: 1; }
+        .item { background: var(--blue); display: flex; align-items: center; height: 95px; position: relative; z-index: 2; transition: 0.3s; width: 100%; }
+        .item.slid { transform: translateX(-80px); }
+        
+        .info { flex-grow: 1; margin-left: 25px; pointer-events: none; }
+        .info b { display: block; text-transform: uppercase; color: var(--gold); }
 
         /* Artist Box & Play Button */
-        .artist-box { width: 110px; height: 100%; position: relative; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); background: #000; }
-        .artist-box img { width: 100%; height: 100%; object-fit: cover; }
-        .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); color: white; text-decoration: none; font-size: 1.5rem; }
+        .artist-img-box { width: 110px; height: 100%; position: relative; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: #000; }
+        .artist-img { width: 100%; height: 100%; object-fit: cover; }
+        .yt-play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); color: white; text-decoration: none; font-size: 1.5rem; }
 
-        /* Final View Points */
-        .pts-badge { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; background: rgba(0,0,0,0.5); }
+        /* Points Circle (Top 10) */
+        .pts-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; background: rgba(0,0,0,0.4); }
 
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: black; border-top: 2px solid var(--gold); display: flex; justify-content: space-around; padding: 10px 0; }
-        .nav-item { color: white; background: none; border: none; font-weight: bold; opacity: 0.6; }
-        .nav-item.active-nav { opacity: 1; color: var(--gold); }
+        /* Banner Design */
+        .user-banner { width: 100%; max-width: 500px; background: black; display: flex; align-items: center; padding: 10px; margin-bottom: 15px; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); }
+        .user-logo { width: 45px; height: 45px; background: #e60000; color: white; border-radius: 5px; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; text-align: center; margin-right: 15px; }
+
+        .input-panel { background: #111; padding: 15px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
+        input, button { padding: 12px; border-radius: 5px; border: none; }
+        input { background: #222; color: #fff; border: 1px solid #444; }
+        .btn-green { background: #4caf50; color: white; font-weight: bold; cursor: pointer; width: 100%; max-width: 500px; padding: 15px; margin-top: 10px; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid var(--gold); }
     </style>
 </head>
 <body>
@@ -57,21 +50,27 @@
     <div class="user-logo">SIMON<br>ESC</div>
 </div>
 
-<div id="view-ranking" class="view active">
+<div id="view-shows" class="view active">
     <div class="input-panel">
+        <input type="text" id="new-show-name" placeholder="Name der neuen Show...">
+        <button onclick="addShow()" style="background:var(--gold); font-weight:bold">Show erstellen</button>
+    </div>
+    <div id="show-container" style="width:100%; display:flex; flex-direction:column; align-items:center; margin-top:20px;"></div>
+</div>
+
+<div id="view-ranking" class="view">
+    <div class="input-panel" id="add-song-panel">
         <input type="hidden" id="edit-id">
-        <input type="text" id="in-country" placeholder="Land">
+        <input type="text" id="in-country" placeholder="Land (z.B. Germany)">
         <input type="text" id="in-artist" placeholder="Künstler">
-        <input type="text" id="in-song" placeholder="Songname">
+        <input type="text" id="in-song" placeholder="Song Name">
         <input type="text" id="in-yt" placeholder="YouTube Link">
-        <input type="file" id="in-file" accept="image/*" style="font-size: 0.7rem;">
-        <button class="btn-main" onclick="saveSong()">SONG SPEICHERN</button>
+        <label style="font-size: 0.7rem; color: #aaa;">Bild:<input type="file" id="file-img" accept="image/*" style="margin-left:5px;"></label>
+        <button id="add-btn" onclick="saveItem()" style="background:var(--gold); font-weight:bold">Speichern</button>
         <button onclick="resetToAlpha()" style="background:#444; color:white;">RESET TO ALPHABETICAL</button>
     </div>
-    
-    <ul id="ranking-list"></ul>
-    
-    <button class="btn-main" style="width:100%; max-width:500px; background:#4caf50; color:white; margin-top:20px; border-radius:30px;" onclick="showFinal()">SAVE MY TOP</button>
+    <ul id="ranking-list" style="list-style:none; padding:0; width:100%; max-width:500px;"></ul>
+    <button class="btn-green" style="border-radius:30px;" onclick="saveMyTop()">SAVE MY TOP</button>
 </div>
 
 <div id="view-final" class="view">
@@ -79,19 +78,26 @@
         <div class="user-logo">SIMON<br>ESC</div>
         <b style="font-size:1.2rem; margin-left:10px;">SimonESC</b>
     </div>
-    <ul id="final-list"></ul>
-    <button class="btn-main" style="width:100%; max-width:500px; background:#4caf50; color:white; border-radius:30px;" onclick="goBack()">EDIT MY TOP</button>
+    <ul id="final-list" style="list-style:none; padding:0; width:100%; max-width:500px;"></ul>
+    <button class="btn-green" style="border-radius:30px; background:#444;" onclick="showView('view-ranking')">EDIT MY TOP</button>
 </div>
 
-<div class="nav-bar">
-    <button class="nav-item active-nav" onclick="location.reload()">HOME</button>
-    <button class="nav-item" onclick="showView('view-ranking')">MY TOP</button>
+<div class="bottom-nav">
+    <button onclick="showView('view-shows')" style="background:none; color:white; border:none; font-weight:bold;">SHOWS</button>
+    <button onclick="showView('view-ranking')" style="background:none; color:var(--gold); border:none; font-weight:bold;">MY TOP</button>
 </div>
 
 <script>
-    let songs = JSON.parse(localStorage.getItem('esc_core_v1') || '[]');
-    const pts = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+    let currentShowId = null;
     let startX = 0;
+    const pts = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+
+    function getFlagURL(country) {
+        if(!country) return '';
+        const map = {"germany":"de","croatia":"hr","finland":"fi","albania":"al","ukraine":"ua","austria":"at","sweden":"se","denmark":"dk","italy":"it","france":"fr","spain":"es","norway":"no"};
+        const c = country.trim().toLowerCase();
+        return map[c] ? `https://flagcdn.com/w160/${map[c]}.png` : `https://via.placeholder.com/50?text=?`;
+    }
 
     function showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -99,56 +105,77 @@
         if(id === 'view-final') renderFinal();
     }
 
-    async function saveSong() {
-        const id = document.getElementById('edit-id').value;
-        const file = document.getElementById('in-file').files[0];
-        let imgData = "https://via.placeholder.com/110";
+    function addShow() {
+        const name = document.getElementById('new-show-name').value;
+        if(!name) return;
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        shows.push({id: Date.now(), name, songs: []});
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        renderShows();
+    }
 
-        if(file) {
-            imgData = await new Promise(r => {
+    function renderShows() {
+        const container = document.getElementById('show-container');
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        container.innerHTML = '';
+        shows.forEach(s => {
+            const div = document.createElement('div');
+            div.style = "width:100%; max-width:500px; background:var(--blue); margin:5px 0; padding:15px; border-radius:5px; cursor:pointer;";
+            div.innerHTML = `<b>⭐ ${s.name}</b>`;
+            div.onclick = () => { currentShowId = s.id; renderSongs(); showView('view-ranking'); };
+            container.appendChild(div);
+        });
+    }
+
+    async function saveItem() {
+        const editId = document.getElementById('edit-id').value;
+        const imgFile = document.getElementById('file-img').files[0];
+        let imgBase64 = null;
+        if(imgFile) {
+            imgBase64 = await new Promise(r => {
                 const reader = new FileReader();
                 reader.onload = () => r(reader.result);
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(imgFile);
             });
         }
-
-        const newSong = {
-            id: id ? parseInt(id) : Date.now(),
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        const show = shows.find(s => s.id === currentShowId);
+        const songData = {
+            id: editId ? parseInt(editId) : Date.now(),
             country: document.getElementById('in-country').value,
             artist: document.getElementById('in-artist').value,
             song: document.getElementById('in-song').value,
             yt: document.getElementById('in-yt').value,
-            img: id ? (songs.find(s => s.id == id).img) : imgData
+            img: imgBase64 || (editId ? show.songs.find(s => s.id == editId).img : 'https://via.placeholder.com/110')
         };
-        
-        if(file) newSong.img = imgData;
-
-        if(id) {
-            const idx = songs.findIndex(s => s.id == id);
-            songs[idx] = newSong;
+        if(editId) {
+            const idx = show.songs.findIndex(s => s.id == editId);
+            show.songs[idx] = songData;
         } else {
-            songs.push(newSong);
+            show.songs.push(songData);
         }
-
-        localStorage.setItem('esc_core_v1', JSON.stringify(songs));
-        clearInputs();
-        renderRanking();
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        document.getElementById('edit-id').value = '';
+        document.querySelectorAll('#add-song-panel input').forEach(i => i.value = '');
+        renderSongs();
     }
 
-    function renderRanking() {
+    function renderSongs() {
         const list = document.getElementById('ranking-list');
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        const show = shows.find(s => s.id === currentShowId);
         list.innerHTML = '';
-        songs.forEach(s => {
+        show.songs.forEach((s, i) => {
             const container = document.createElement('div');
             container.className = 'item-container';
             container.innerHTML = `
-                <div class="edit-side" onclick="editSong(${s.id})">EDIT</div>
+                <div class="edit-btn" onclick="editSong(${s.id})">EDIT</div>
                 <div class="item" ontouchstart="startX=event.touches[0].clientX" ontouchmove="handleSlide(this, event)">
-                    <div class="diamond"><img src="https://flagcdn.com/w160/${getCode(s.country)}.png"></div>
+                    <div class="diamond"><img src="${getFlagURL(s.country)}"></div>
                     <div class="info"><b>${s.country}</b><span>${s.artist}</span></div>
-                    <div class="artist-box">
-                        <img src="${s.img}">
-                        ${s.yt ? `<a href="${s.yt}" target="_blank" class="play-overlay">▶</a>` : ''}
+                    <div class="artist-img-box">
+                        <img src="${s.img}" class="artist-img">
+                        ${s.yt ? `<a href="${s.yt}" target="_blank" class="yt-play-overlay">▶</a>` : ''}
                     </div>
                 </div>`;
             list.appendChild(container);
@@ -162,58 +189,59 @@
     }
 
     function editSong(id) {
-        const s = songs.find(x => x.id === id);
-        document.getElementById('edit-id').value = s.id;
-        document.getElementById('in-country').value = s.country;
-        document.getElementById('in-artist').value = s.artist;
-        document.getElementById('in-song').value = s.song;
-        document.getElementById('in-yt').value = s.yt;
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        const song = shows.find(s => s.id === currentShowId).songs.find(s => s.id === id);
+        document.getElementById('edit-id').value = song.id;
+        document.getElementById('in-country').value = song.country;
+        document.getElementById('in-artist').value = song.artist;
+        document.getElementById('in-song').value = song.song;
+        document.getElementById('in-yt').value = song.yt || '';
         window.scrollTo(0,0);
     }
 
     function resetToAlpha() {
-        songs.sort((a,b) => a.country.localeCompare(b.country));
-        localStorage.setItem('esc_core_v1', JSON.stringify(songs));
-        renderRanking();
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        const show = shows.find(s => s.id === currentShowId);
+        show.songs.sort((a,b) => a.country.localeCompare(b.country));
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        renderSongs();
     }
 
-    function showFinal() { showView('view-final'); }
-    function goBack() { showView('view-ranking'); }
+    function saveMyTop() {
+        alert("Saved successfully!");
+        showView('view-final');
+    }
 
     function renderFinal() {
         const list = document.getElementById('final-list');
+        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+        const show = shows.find(s => s.id === currentShowId);
         list.innerHTML = '';
-        songs.forEach((s, i) => {
+        show.songs.forEach((s, i) => {
+            const p = pts[i] ? `<div class="pts-circle">${pts[i]}</div>` : '';
+            const bg = i === 0 ? 'linear-gradient(90deg, #c8a45e, #0a1931)' : (i === 1 ? 'linear-gradient(90deg, #a0a0a0, #0a1931)' : (i === 2 ? 'linear-gradient(90deg, #cd7f32, #0a1931)' : 'var(--blue)'));
             list.innerHTML += `
-                <div class="item" style="margin-bottom:5px; background:${i<3 ? 'linear-gradient(90deg, #c8a45e, #0a1931)' : 'var(--grad)'}">
+                <div class="item" style="margin-bottom:5px; background:${bg}">
                     <div style="width:30px; text-align:right; font-weight:bold; margin-right:10px">${i+1}</div>
-                    <div class="diamond" style="width:35px; height:35px;"><img src="https://flagcdn.com/w160/${getCode(s.country)}.png"></div>
+                    <div class="diamond" style="width:35px; height:35px;"><img src="${getFlagURL(s.country)}"></div>
                     <div class="info"><b>${s.country}</b></div>
-                    <div class="pts-badge">${pts[i] || ''}</div>
+                    ${p}
                 </div>`;
         });
-    }
-
-    function getCode(c) {
-        const m = {"Germany":"de","Croatia":"hr","Finland":"fi","Albania":"al","Ukraine":"ua","Austria":"at","Sweden":"se","Denmark":"dk"};
-        return m[c] || "un";
-    }
-
-    function clearInputs() {
-        document.querySelectorAll('.input-panel input').forEach(i => i.value = '');
     }
 
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
         onEnd: () => {
-            const names = Array.from(document.querySelectorAll('#ranking-list .info b')).map(b => b.innerText);
-            songs.sort((a,b) => names.indexOf(a.country.toUpperCase()) - names.indexOf(b.country.toUpperCase()));
-            localStorage.setItem('esc_core_v1', JSON.stringify(songs));
+            const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
+            const show = shows.find(s => s.id === currentShowId);
+            const countries = Array.from(document.querySelectorAll('#ranking-list .info b')).map(b => b.innerText);
+            show.songs.sort((a,b) => countries.indexOf(a.country.toUpperCase()) - countries.indexOf(b.country.toUpperCase()));
+            localStorage.setItem('esc_v5', JSON.stringify(shows));
         }
     });
 
-    renderRanking();
+    renderShows();
 </script>
 </body>
 </html>
-
