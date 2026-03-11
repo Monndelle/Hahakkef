@@ -3,249 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESC Pro Manager V2.2</title>
+    <title>ESC Scoreboard Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --blue: linear-gradient(90deg, #0a1931 0%, #185adb 100%); --gold: #c8a45e; }
-        body { background: #050a18; color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        :root { --esc-blue: #0a1931; --esc-gold: #c8a45e; --esc-gradient: linear-gradient(90deg, #0a1931 0%, #185adb 100%); }
+        body { background-color: #050a18; color: white; font-family: 'Trebuchet MS', sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
         .view { display: none; padding: 15px; flex-direction: column; align-items: center; }
         .active { display: flex; }
-        .app-header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
-        .show-item { width: 100%; max-width: 500px; background: var(--blue); margin: 5px 0; padding: 15px; border-radius: 5px; cursor: pointer; }
-        .item-container { position: relative; margin-bottom: 8px; overflow: hidden; border-radius: 5px; background: var(--gold); }
-        .edit-btn { position: absolute; right: 0; top: 0; height: 100%; width: 80px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
-        .item { background: var(--blue); display: flex; align-items: center; height: 95px; position: relative; z-index: 2; transition: 0.3s; width: 100%; }
+        
+        .app-header { width: 100%; background: black; padding: 15px; border-bottom: 2px solid var(--esc-gold); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; }
+        .user-banner { width: 100%; max-width: 500px; background: black; display: flex; align-items: center; padding: 10px; margin-bottom: 10px; clip-path: polygon(0 0, 100% 0, 93% 100%, 0% 100%); }
+        .user-logo { width: 50px; height: 50px; background: #e60000; border-radius: 5px; font-weight: bold; font-size: 11px; display: flex; align-items: center; justify-content: center; text-align: center; margin-right: 15px; }
+
+        #ranking-list, #final-list { list-style: none; padding: 0; width: 100%; max-width: 500px; }
+        .item-container { position: relative; margin-bottom: 5px; }
+        .item { background: var(--esc-gradient); display: flex; align-items: center; height: 85px; position: relative; z-index: 2; transition: transform 0.3s; border-radius: 2px; }
         .item.slid { transform: translateX(-80px); }
-        .info { flex-grow: 1; margin-left: 15px; pointer-events: none; }
-        .flag { width: 55px; height: 38px; margin-left: 10px; border: 1px solid #fff; object-fit: cover; }
-        .artist-img-box { width: 100px; height: 100%; position: relative; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: #000; }
-        .artist-img { width: 100%; height: 100%; object-fit: cover; }
-        .yt-play-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255, 255, 255, 0.7); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: red; text-decoration: none; font-size: 1.2rem; z-index: 5; display: none; }
-        .artist-img-box:hover .yt-play-btn { display: flex; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid var(--gold); }
-        .input-panel { background: #111; padding: 15px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-        input { padding: 10px; background: #222; color: #fff; border: 1px solid #444; }
-        .save-top-btn { width: 100%; max-width: 500px; background: #4caf50; color: white; border: none; padding: 15px; margin-top: 15px; border-radius: 5px; font-weight: bold; cursor: pointer; display: none; }
+        .edit-btn-side { position: absolute; right: 0; top: 0; height: 100%; width: 80px; background: var(--esc-gold); color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1; border-radius: 2px; }
+
+        /* Top 3 Styling */
+        .item-gold { background: linear-gradient(90deg, #c8a45e 0%, #0a1931 100%) !important; }
+        .item-silver { background: linear-gradient(90deg, #a0a0a0 0%, #0a1931 100%) !important; }
+        .item-bronze { background: linear-gradient(90deg, #cd7f32 0%, #0a1931 100%) !important; }
+
+        .flag-diamond { width: 45px; height: 45px; margin-left: 10px; background: #333; transform: rotate(45deg); overflow: hidden; border: 2px solid #555; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .flag-diamond img { width: 140%; height: 140%; transform: rotate(-45deg); object-fit: cover; }
         
-        /* Community Design Update */
-        #community-list { width: 100%; max-width: 500px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 5px; overflow: hidden; }
-        .comm-item { display: flex; align-items: center; padding: 12px; background: rgba(10, 25, 49, 0.7); border-bottom: 1px solid rgba(24, 90, 219, 0.3); }
-        .comm-item:last-child { border-bottom: none; }
-        .comm-rank { font-weight: bold; font-size: 1.1rem; width: 30px; text-align: right; margin-right: 15px; color: white; }
-        .comm-flag { width: 30px; height: 20px; object-fit: cover; border: 1px solid white; margin-right: 15px; }
-        .comm-country { flex-grow: 1; font-weight: bold; text-transform: uppercase; color: white; }
-        .comm-points { font-weight: bold; background: rgba(100, 100, 100, 0.5); padding: 5px 10px; border-radius: 15px; color: white; }
+        .info { flex-grow: 1; margin-left: 20px; }
+        .info b { text-transform: uppercase; font-size: 1.1rem; display: block; color: var(--esc-gold); }
+        .info span { font-size: 0.9rem; opacity: 0.9; font-weight: bold; }
         
-        /* Show-specific colors for first 3 ranks in community */
-        .comm-item:nth-child(1) { background: linear-gradient(90deg, #c8a45e 0%, rgba(10, 25, 49, 0.7) 100%); }
-        .comm-item:nth-child(1) .comm-points { background: #c8a45e; color: black; }
-        .comm-item:nth-child(2) { background: linear-gradient(90deg, #a0a0a0 0%, rgba(10, 25, 49, 0.7) 100%); }
-        .comm-item:nth-child(2) .comm-points { background: #a0a0a0; color: black; }
-        .comm-item:nth-child(3) { background: linear-gradient(90deg, #cd7f32 0%, rgba(10, 25, 49, 0.7) 100%); }
-        .comm-item:nth-child(3) .comm-points { background: #cd7f32; color: black; }
+        .pts-circle { background: rgba(0,0,0,0.6); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid var(--esc-gold); margin-right: 10px; color: var(--esc-gold); }
+        
+        .artist-slice { width: 100px; height: 100%; position: relative; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: black; overflow: hidden; }
+        .artist-slice img { width: 100%; height: 100%; object-fit: cover; }
+        .play-btn { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); color: white; text-decoration: none; font-size: 1.5rem; text-shadow: 0 0 5px black; }
+
+        .btn-action { width: 100%; max-width: 500px; padding: 15px; border: none; color: white; font-weight: bold; border-radius: 30px; margin: 10px 0; cursor: pointer; text-transform: uppercase; }
+        .btn-save { background: linear-gradient(to bottom, #7db343, #4a7a2a); border: 2px solid #999; }
+        .btn-reset { background: #555; font-size: 0.8rem; padding: 10px; margin-bottom: 20px; }
+        
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: black; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid var(--esc-gold); z-index: 100; }
     </style>
 </head>
 <body>
 
 <div class="app-header">
-    <div style="font-weight:bold">SIMON ESC</div>
-    <div id="header-title">Show Auswahl</div>
+    <button onclick="showView('view-shows')" style="background:none; border:none; color:white; font-size:1.5rem">☰</button>
+    <div id="header-title">2026 Eurovision</div>
+    <div style="width:30px"></div>
 </div>
 
 <div id="view-shows" class="view active">
-    <div class="input-panel">
-        <input type="text" id="new-show-name" placeholder="Name der neuen Show...">
-        <button onclick="addShow()" style="background:var(--gold); padding:10px; border:none; font-weight:bold">Show erstellen</button>
-    </div>
-    <div id="show-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+    <div class="user-banner"><div class="user-logo">SIMON<br>ESC</div><b>Select Year</b></div>
+    <div id="show-container" style="width:100%; max-width:500px;"></div>
 </div>
 
 <div id="view-ranking" class="view">
-    <div class="input-panel" id="add-song-panel">
-        <input type="hidden" id="edit-id">
-        <input type="text" id="in-country" placeholder="Land">
-        <input type="text" id="in-artist" placeholder="Sänger">
-        <input type="text" id="in-song" placeholder="Song Name">
-        <input type="text" id="in-yt" placeholder="YouTube Link">
-        <input type="text" id="in-emoji" placeholder="Flagge als Emoji">
-        <label style="font-size: 0.8rem; color: #aaa;">Künstlerbild:<input type="file" id="file-img" accept="image/*" style="margin-left: 10px;"></label>
-        <button id="add-btn" onclick="saveItem()" style="background:var(--gold); padding:10px; border:none; font-weight:bold">Speichern</button>
-    </div>
-    <ul id="ranking-list" style="list-style:none; padding:0; width:100%; max-width:500px;"></ul>
-    <button id="save-top-nav-btn" class="save-top-btn" onclick="showView('view-ranking')">SAVE YOUR TOP</button>
+    <button class="btn-action btn-reset" onclick="resetRanking()">Reset to Alphabetical</button>
+    <ul id="ranking-list"></ul>
+    <button class="btn-action btn-save" onclick="finishTop()">Save My Top</button>
 </div>
 
-<div id="view-community" class="view">
-    <div id="community-list"></div>
-    <div class="input-panel">
-        <input type="text" id="c-country" placeholder="Land (Englisch für Auto-Flagge)">
-        <input type="number" id="c-pts" placeholder="Punkte">
-        <input type="text" id="c-emoji" placeholder="Länder-Emoji (optional)">
-        <button onclick="addComm()" style="background:#185adb; color:white; padding:10px; border:none;">Eintragen</button>
-    </div>
+<div id="view-final" class="view">
+    <div class="user-banner"><div class="user-logo">SIMON<br>ESC</div><b>SimonESC</b></div>
+    <ul id="final-list"></ul>
+    <button class="btn-action btn-save" onclick="showView('view-ranking')" style="background: #7db343">Edit My Top</button>
 </div>
 
 <div class="bottom-nav">
-    <button onclick="showView('view-shows')" style="background:#185adb; color:white; border:none; padding:10px; border-radius:5px;">SHOWS</button>
-    <button onclick="showView('view-ranking')" style="background:#4caf50; color:white; border:none; padding:10px; border-radius:5px;">MY TOP</button>
-    <button onclick="showView('view-community')" style="background:#185adb; color:white; border:none; padding:10px; border-radius:5px;">COMMUNITY</button>
+    <button onclick="showView('view-shows')" style="background:none; border:none; color:white;">YEARS</button>
+    <button onclick="showView('view-ranking')" style="background:none; border:none; color:white;">MY TOP</button>
 </div>
 
 <script>
     let currentShowId = null;
-    let startX = 0;
-
-    // --- Flag Logic (simplified for English names) ---
-    function getFlagURL(country) {
-        if(!country) return '';
-        const c = country.trim().toLowerCase();
-        const map = {"germany":"de","italy":"it","france":"fr","spain":"es","croatia":"hr","switzerland":"ch","ukraine":"ua","finland":"fi","sweden":"se","norway":"no","netherlands":"nl"};
-        if(map[c]) return `https://flagcdn.com/w80/${map[c]}.png`;
-        return ''; 
-    }
+    const ptsTable = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
 
     function showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'view-ranking' && currentShowId) {
-            document.getElementById('save-top-nav-btn').style.display = 'block';
-        } else {
-            document.getElementById('save-top-nav-btn').style.display = 'none';
-        }
-        if(id === 'view-community') renderComm();
+        if(id === 'view-final') renderFinal();
     }
 
-    function addShow() {
-        const name = document.getElementById('new-show-name').value;
-        if(!name) return;
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
-        shows.push({id: Date.now(), name, songs: [], community: []});
-        localStorage.setItem('esc_v4', JSON.stringify(shows));
+    // Beispiel Daten laden/erstellen
+    function loadData() {
+        let shows = JSON.parse(localStorage.getItem('esc_v6') || '[]');
+        if(shows.length === 0) {
+            shows = [{
+                id: 1, name: "2026 Vienna", songs: [
+                    { country: "Croatia", artist: "Baby Lasagna", img: "https://via.placeholder.com/100" },
+                    { country: "Finland", artist: "Windows95man", img: "https://via.placeholder.com/100" },
+                    { country: "Ukraine", artist: "Alyona & Jerry", img: "https://via.placeholder.com/100" },
+                    { country: "Albania", artist: "Besa", img: "https://via.placeholder.com/100" }
+                ]
+            }];
+            localStorage.setItem('esc_v6', JSON.stringify(shows));
+        }
         renderShows();
     }
 
     function renderShows() {
         const container = document.getElementById('show-container');
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
+        const shows = JSON.parse(localStorage.getItem('esc_v6'));
         container.innerHTML = '';
         shows.forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'show-item';
-            div.innerHTML = `<b>⭐ ${s.name}</b>`;
-            div.onclick = () => { currentShowId = s.id; renderSongs(); showView('view-ranking'); };
-            container.appendChild(div);
+            container.innerHTML += `<div onclick="openShow(${s.id})" style="background:rgba(255,255,255,0.1); margin:10px; padding:20px; border-radius:10px;">${s.name}</div>`;
         });
     }
 
-    async function saveItem() {
-        const editId = document.getElementById('edit-id').value;
-        const imgFile = document.getElementById('file-img').files[0];
-        let imgBase64 = null;
-        if(imgFile) {
-            imgBase64 = await new Promise(r => {
-                const reader = new FileReader();
-                reader.onload = () => r(reader.result);
-                reader.readAsDataURL(imgFile);
-            });
-        }
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
+    function openShow(id) {
+        currentShowId = id;
+        renderSongs();
+        showView('view-ranking');
+    }
+
+    // Alphabetischer Reset
+    function resetRanking() {
+        const shows = JSON.parse(localStorage.getItem('esc_v6'));
         const show = shows.find(s => s.id === currentShowId);
-        const songData = {
-            id: editId ? parseInt(editId) : Date.now(),
-            country: document.getElementById('in-country').value,
-            artist: document.getElementById('in-artist').value,
-            song: document.getElementById('in-song').value,
-            yt: document.getElementById('in-yt').value,
-            emoji: document.getElementById('in-emoji').value,
-            img: imgBase64 || (editId ? show.songs.find(s => s.id == editId).img : 'https://via.placeholder.com/110')
-        };
-        if(editId) {
-            const idx = show.songs.findIndex(s => s.id == editId);
-            show.songs[idx] = songData;
-        } else {
-            show.songs.push(songData);
-        }
-        localStorage.setItem('esc_v4', JSON.stringify(shows));
-        document.querySelectorAll('#add-song-panel input').forEach(i => i.value = '');
+        show.songs.sort((a, b) => a.country.localeCompare(b.country));
+        localStorage.setItem('esc_v6', JSON.stringify(shows));
         renderSongs();
     }
 
     function renderSongs() {
         const list = document.getElementById('ranking-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
+        const shows = JSON.parse(localStorage.getItem('esc_v6'));
         const show = shows.find(s => s.id === currentShowId);
         list.innerHTML = '';
         show.songs.forEach((s, i) => {
-            const container = document.createElement('div');
-            container.className = 'item-container';
-            const ytUrl = s.yt ? s.yt.replace("watch?v=", "embed/") : null;
-            container.innerHTML = `
-                <div class="edit-btn" onclick="editSong(${s.id})">EDIT</div>
-                <div class="item" ontouchstart="startX=event.touches[0].clientX" ontouchmove="if(startX-event.touches[0].clientX>30)this.classList.add('slid');if(startX-event.touches[0].clientX<-30)this.classList.remove('slid')">
-                    <div style="font-size:2rem; margin:10px">${s.emoji || '🚩'}</div>
-                    <div class="info"><b>${s.country}</b><br>${s.artist}<br><small>${s.song}</small></div>
-                    <div class="artist-img-box">
-                        <img src="${s.img}" class="artist-img">
-                        ${ytUrl ? `<a href="${ytUrl}" target="_blank" class="yt-play-btn">▶</a>` : ''}
-                    </div>
+            const li = document.createElement('div');
+            li.className = 'item-container';
+            li.innerHTML = `
+                <div class="edit-btn-side">EDIT</div>
+                <div class="item">
+                    <div class="flag-diamond"><img src="https://flagcdn.com/w160/${getCC(s.country)}.png"></div>
+                    <div class="info"><b>${s.country}</b><span>${s.artist}</span></div>
+                    <div class="artist-slice"><img src="${s.img}"><div class="play-btn">▶</div></div>
                 </div>`;
-            list.appendChild(container);
+            list.appendChild(li);
         });
     }
 
-    function editSong(id) {
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
-        const song = shows.find(s => s.id === currentShowId).songs.find(s => s.id === id);
-        document.getElementById('edit-id').value = song.id;
-        document.getElementById('in-country').value = song.country;
-        document.getElementById('in-artist').value = song.artist;
-        document.getElementById('in-song').value = song.song;
-        document.getElementById('in-yt').value = song.yt || '';
-        document.getElementById('in-emoji').value = song.emoji;
-        document.getElementById('add-btn').innerText = "Ändern";
-        window.scrollTo(0,0);
+    function finishTop() {
+        showView('view-final');
     }
 
-    function addComm() {
-        const country = document.getElementById('c-country').value;
-        const pts = document.getElementById('c-pts').value;
-        const emoji = document.getElementById('c-emoji').value;
-        if(!country || !pts) return;
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
+    function renderFinal() {
+        const list = document.getElementById('final-list');
+        const shows = JSON.parse(localStorage.getItem('esc_v6'));
         const show = shows.find(s => s.id === currentShowId);
-        show.community.push({id: Date.now(), country, pts: parseInt(pts), emoji, flagUrl: getFlagURL(country)});
-        localStorage.setItem('esc_v4', JSON.stringify(shows));
-        renderComm();
-    }
-
-    function renderComm() {
-        const container = document.getElementById('community-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
-        container.innerHTML = '';
-        if(show) show.community.sort((a,b)=>b.pts-a.pts).forEach((c,i)=> {
-            container.innerHTML += `
-                <div class="comm-item">
-                    <div class="comm-rank">${i+1}</div>
-                    ${c.emoji ? `<div style="font-size:1.5rem; margin-right:15px;">${c.emoji}</div>` : (c.flagUrl ? `<img src="${c.flagUrl}" class="comm-flag">` : `<div style="width:30px; margin-right:15px; text-align:center;">?</div>`)}
-                    <div class="comm-country">${c.country}</div>
-                    <div class="comm-points">${c.pts.toLocaleString()}</div>
+        list.innerHTML = '';
+        show.songs.forEach((s, i) => {
+            let topClass = i === 0 ? 'item-gold' : i === 1 ? 'item-silver' : i === 2 ? 'item-bronze' : '';
+            list.innerHTML += `
+                <div class="item ${topClass}" style="margin-bottom:5px">
+                    <b style="width:30px; margin-left:10px">${i+1}</b>
+                    <div class="flag-diamond" style="width:35px; height:35px; border:1px solid white"><img src="https://flagcdn.com/w160/${getCC(s.country)}.png"></div>
+                    <div class="info"><b>${s.country}</b></div>
+                    ${i < 10 ? `<div class="pts-circle">${ptsTable[i]}</div>` : ''}
                 </div>`;
         });
+    }
+
+    function getCC(c) {
+        const map = {"Croatia":"hr","Finland":"fi","Ukraine":"ua","Albania":"al","Germany":"de","Austria":"at"};
+        return map[c] || "un";
     }
 
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
         onEnd: () => {
-            const shows = JSON.parse(localStorage.getItem('esc_v4') || '[]');
+            const shows = JSON.parse(localStorage.getItem('esc_v6'));
             const show = shows.find(s => s.id === currentShowId);
-            const countries = Array.from(document.querySelectorAll('.item .info b')).map(b => b.innerText);
+            const countries = Array.from(document.querySelectorAll('#ranking-list .info b')).map(b => b.innerText);
             show.songs.sort((a,b) => countries.indexOf(a.country.toUpperCase()) - countries.indexOf(b.country.toUpperCase()));
-            localStorage.setItem('esc_v4', JSON.stringify(shows));
+            localStorage.setItem('esc_v6', JSON.stringify(shows));
         }
     });
 
-    renderShows();
+    loadData();
 </script>
 </body>
 </html>
