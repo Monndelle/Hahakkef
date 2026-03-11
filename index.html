@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimonESC - Professional Typography</title>
+    <title>SimonESC - Original Look Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root { 
@@ -15,106 +15,76 @@
             --bronze-grad: linear-gradient(90deg, #a0522d 0%, #8b4513 100%);
             --gold-accent: #c8a45e;
         }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding-bottom: 100px; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 100px; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         .app-header { background: #000; padding: 15px; border-bottom: 1px solid var(--gold-accent); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
         .view { display: none; padding: 10px; flex-direction: column; align-items: center; }
         .active { display: flex; }
 
-        .item-container { position: relative; width: 100%; max-width: 500px; margin-bottom: 4px; border-radius: 6px; overflow: hidden; }
+        .item-container { width: 100%; max-width: 500px; margin-bottom: 6px; border-radius: 6px; overflow: hidden; position: relative; }
+        .item { background: var(--neutral-grad); display: flex; align-items: center; height: 95px; transition: 0.3s; }
         
-        .item { background: var(--neutral-grad); display: flex; align-items: center; height: 95px; position: relative; z-index: 2; transition: 0.3s; opacity: 0.8; }
-        
-        .is-ranked .item { background: var(--blue-grad); opacity: 1; }
+        /* Ranking Colors */
+        .is-ranked .item { background: var(--blue-grad); }
         .is-ranked .item.rank-1 { background: var(--gold-grad); }
         .is-ranked .item.rank-2 { background: var(--silver-grad); }
         .is-ranked .item.rank-3 { background: var(--bronze-grad); }
 
-        .rank-num { width: 40px; text-align: center; font-weight: 700; font-size: 1.1rem; opacity: 0.5; }
-        .is-ranked .rank-num { opacity: 1; }
-        
-        .flag-pure { width: 50px; height: 50px; margin: 0 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 34px; }
+        .rank-num { width: 35px; text-align: center; font-weight: 700; opacity: 0.6; flex-shrink: 0; }
+        .flag-pure { width: 45px; height: 45px; margin: 0 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; flex-shrink: 0; }
 
-        /* Optimierte Text-Styles basierend auf Screenshot */
-        .info { flex-grow: 1; margin-left: 5px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
-        .info b { 
-            display: block; 
-            text-transform: uppercase; 
-            font-size: 1.1rem; 
-            letter-spacing: 0.5px; 
-            color: var(--gold-accent); 
-            line-height: 1.1;
-            margin-bottom: 2px;
-        }
-        .info span { 
-            font-size: 1.3rem; 
-            font-weight: 600; 
-            color: #ffffff; 
-            line-height: 1.1;
-        }
-        .info small { 
-            display: block; 
-            font-size: 0.9rem; 
-            opacity: 0.7; 
-            font-weight: 300;
-            margin-top: 1px;
-        }
+        /* Typography Fix - Following Original Image Style */
+        .info { flex-grow: 1; padding: 5px 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden; white-space: nowrap; }
+        .info b { color: var(--gold-accent); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; margin-bottom: 2px; }
+        .info span { font-size: 1.25rem; font-weight: 700; line-height: 1.1; overflow: hidden; text-overflow: ellipsis; display: block; }
+        .info small { opacity: 0.5; font-size: 0.85rem; font-weight: 300; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; }
 
-        .pts-badge { display: none; width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; font-weight: bold; font-size: 1rem; margin-right: 12px; flex-shrink: 0; }
+        .pts-badge { display: none; width: 42px; height: 42px; border-radius: 50%; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.2); align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; z-index: 5; }
         .is-ranked .pts-badge { display: flex; }
 
-        .artist-img-slot { width: 90px; height: 100%; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); background: #000; flex-shrink: 0; filter: grayscale(100%); transition: 0.4s; }
-        .is-ranked .artist-img-slot { filter: grayscale(0%); }
+        .artist-img-slot { width: 100px; height: 100%; position: absolute; right: 0; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: #000; z-index: 1; }
         .artist-img-slot img { width: 100%; height: 100%; object-fit: cover; }
 
-        .swipe-actions { position: absolute; top: 0; right: 0; height: 100%; display: flex; z-index: 1; }
-        .action-btn { width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border: none; }
-        .btn-edit { background: #f39c12; }
-        .btn-delete { background: #c0392b; }
+        .btn-reset { width: 100%; max-width: 500px; padding: 12px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333; border-radius: 25px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; }
 
-        .input-group { background: #111; padding: 15px; border-radius: 10px; width: 90%; margin: 15px 0; box-sizing: border-box; border: 1px solid #222; }
-        input { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 4px; background: #222; color: white; box-sizing: border-box; font-size: 16px; }
-        .btn-main { width: 94%; padding: 15px; border: none; border-radius: 30px; font-weight: bold; margin: 10px 0; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        
-        #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--gold-accent); padding: 25px; border-radius: 15px; z-index: 1000; display: none; text-align: center; }
+        .input-group { background: #111; padding: 15px; border-radius: 10px; width: 90%; margin: 15px 0; border: 1px solid #222; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 4px; background: #222; color: white; box-sizing: border-box; }
+        .btn-main { width: 100%; padding: 15px; border: none; border-radius: 30px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
 
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #222; z-index: 100; }
-        .nav-btn { background: none; border: none; color: #666; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid #222; z-index: 100; }
+        .nav-btn { background: none; border: none; color: #555; font-size: 0.75rem; font-weight: bold; }
         .nav-btn.active-nav { color: white; border-bottom: 2px solid var(--gold-accent); }
     </style>
 </head>
 <body>
 
-<div id="toast"><h2 style="margin:0; color:var(--gold-accent);">GESPEICHERT!</h2><p>Deine Liste wurde aktualisiert. ✅</p></div>
-
 <div class="app-header">
-    <div style="font-weight:900; color:red; line-height:1; font-size: 1.2rem;">SIMON<br>ESC</div>
-    <span id="header-title" style="font-weight: bold; letter-spacing: 1px;">ESC MANAGER</span>
+    <div style="font-weight:900; color:red; line-height:1;">SIMON<br>ESC</div>
+    <span id="header-title">ESC MANAGER</span>
     <div style="width:40px"></div>
 </div>
 
 <div id="view-shows" class="view active">
     <div class="input-group">
-        <input type="text" id="new-show-name" placeholder="Name der Show...">
-        <button onclick="addShow()" class="btn-main" style="background:var(--gold-accent); height:45px; padding:0;">SHOW ERSTELLEN</button>
+        <input type="text" id="new-show-name" placeholder="Name der Show (z.B. 2026)">
+        <button onclick="addShow()" class="btn-main" style="background:var(--gold-accent); margin-top:10px;">SHOW ERSTELLEN</button>
     </div>
     <div id="show-container" style="width:100%;"></div>
 </div>
 
 <div id="view-ranking" class="view">
+    <button class="btn-reset" onclick="resetAlphabetical()">Reset to Alphabetically</button>
     <div id="ranking-list" style="width:100%;"></div>
-    <button class="btn-main" style="background:#6ab04c;" onclick="saveTop()">SAVE MY TOP</button>
-
+    
     <div class="input-group" id="artist-form">
-        <h3 id="form-title" style="margin:0 0 10px 0;">Artist hinzufügen</h3>
         <input type="hidden" id="edit-artist-id">
         <div style="display:flex; gap:5px;">
             <input type="text" id="in-country" placeholder="Land" style="width:70%;">
             <input type="text" id="in-emoji" placeholder="Emoji" style="width:30%;">
         </div>
-        <input type="text" id="in-artist" placeholder="Artist Name">
-        <input type="text" id="in-song" placeholder="Song Name">
-        <input type="file" id="in-file" style="font-size:0.7rem;">
+        <input type="text" id="in-artist" placeholder="Artist">
+        <input type="text" id="in-song" placeholder="Song">
+        <input type="file" id="in-file" accept="image/*">
         <button onclick="saveArtist()" class="btn-main" style="background:var(--blue-grad); margin-top:10px;">SPEICHERN</button>
     </div>
 </div>
@@ -122,12 +92,13 @@
 <div id="view-community" class="view">
     <div id="community-list" style="width:100%;"></div>
     <div class="input-group">
-        <h3 style="margin:0 0 10px 0;">Community Score</h3>
         <input type="hidden" id="edit-comm-id">
-        <input type="text" id="c-country" placeholder="Land">
-        <input type="text" id="c-emoji" placeholder="Emoji">
-        <input type="number" id="c-pts" placeholder="Punkte">
-        <button onclick="saveComm()" class="btn-main" style="background:#185adb;">SCORE SPEICHERN</button>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="c-country" placeholder="Land" style="width:70%;">
+            <input type="text" id="c-emoji" placeholder="Emoji" style="width:30%;">
+        </div>
+        <input type="number" id="c-pts" placeholder="Gesamtpunkte">
+        <button onclick="saveComm()" class="btn-main" style="background:#185adb; margin-top:10px;">COMMUNITY SCORE SPEICHERN</button>
     </div>
 </div>
 
@@ -138,9 +109,8 @@
 </div>
 
 <script>
-    // Identische Logik wie zuvor zur Handhabung von Shows, Artists und Ranking
     let currentShowId = null;
-    let startX = 0;
+    let longPressTimer;
     const ptsMap = {1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1};
 
     function showView(id, btn) {
@@ -152,44 +122,51 @@
         if(id === 'view-community') renderComm();
     }
 
+    // LONG PRESS HELPER
+    function applyLongPress(el, fn) {
+        el.addEventListener('touchstart', () => longPressTimer = setTimeout(fn, 800));
+        el.addEventListener('touchend', () => clearTimeout(longPressTimer));
+        el.addEventListener('touchmove', () => clearTimeout(longPressTimer));
+    }
+
+    // LOGIC: YEARS
     function addShow() {
         const name = document.getElementById('new-show-name').value;
         if(!name) return;
-        let shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
         shows.push({id: Date.now(), name, songs: [], community: [], isRanked: false});
-        localStorage.setItem('esc_v3', JSON.stringify(shows));
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
         document.getElementById('new-show-name').value = '';
         renderShows();
     }
 
     function renderShows() {
         const container = document.getElementById('show-container');
-        let shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
         container.innerHTML = '';
         shows.forEach(s => {
             const div = document.createElement('div');
-            div.style = "background:#1a1a1a; margin:5px; padding:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; border-left: 4px solid var(--gold-accent);";
-            div.innerHTML = `
-                <div onclick="openShow(${s.id})" style="flex-grow:1;"><b>${s.name}</b><br><small>${s.songs.length} Artists</small></div>
-                <div style="display:flex; gap:15px;"><span style="color:red" onclick="deleteShow(${s.id})">✕</span></div>`;
+            div.className = 'item-container';
+            div.innerHTML = `<div class="item" style="padding:15px; border-left:4px solid var(--gold-accent);"><b>${s.name}</b></div>`;
+            div.onclick = () => openShow(s.id);
+            applyLongPress(div, () => { if(confirm('Show löschen?')) { shows = shows.filter(x => x.id !== s.id); localStorage.setItem('esc_v5', JSON.stringify(shows)); renderShows(); }});
             container.appendChild(div);
         });
     }
 
     function openShow(id) {
         currentShowId = id;
-        const shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
-        document.getElementById('header-title').innerText = shows.find(s => s.id === id).name;
         showView('view-ranking');
     }
 
+    // LOGIC: ARTISTS
     async function saveArtist() {
-        let shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_v5'));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         const editId = document.getElementById('edit-artist-id').value;
         const file = document.getElementById('in-file').files[0];
         
-        let img = editId ? shows[sIdx].songs.find(x => x.id == editId).img : 'https://via.placeholder.com/100';
+        let img = editId ? (shows[sIdx].songs.find(x => x.id == editId)?.img || '') : '';
         if(file) {
             img = await new Promise(r => {
                 const reader = new FileReader();
@@ -212,23 +189,18 @@
             shows[sIdx].songs[aIdx] = data;
         } else {
             shows[sIdx].songs.push(data);
-            if(!shows[sIdx].isRanked) shows[sIdx].songs.sort((a,b) => a.country.localeCompare(b.country));
         }
 
-        localStorage.setItem('esc_v3', JSON.stringify(shows));
-        resetArtistForm();
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        resetForm('artist-form');
         renderSongs();
     }
 
     function renderSongs() {
         const list = document.getElementById('ranking-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
-        if(!show) return;
+        const show = JSON.parse(localStorage.getItem('esc_v5')).find(s => s.id === currentShowId);
         list.innerHTML = '';
-        
-        if(show.isRanked) list.classList.add('is-ranked');
-        else list.classList.remove('is-ranked');
+        list.className = show.isRanked ? 'is-ranked' : '';
 
         show.songs.forEach((s, i) => {
             const rank = i + 1;
@@ -236,33 +208,90 @@
             const wrap = document.createElement('div');
             wrap.className = 'item-container';
             wrap.innerHTML = `
-                <div class="swipe-actions">
-                    <button class="action-btn btn-edit" onclick="editArtist(${s.id})">EDIT</button>
-                    <button class="action-btn btn-delete" onclick="deleteArtist(${s.id})">DEL</button>
-                </div>
-                <div class="item ${rank <= 3 ? 'rank-'+rank : ''}" ontouchstart="startX=event.touches[0].clientX" ontouchmove="handleSwipe(this, event)">
+                <div class="item ${rank <= 3 ? 'rank-'+rank : ''}">
                     <div class="rank-num">${show.isRanked ? rank : '-'}</div>
-                    <div class="flag-pure">${s.emoji || '🚩'}</div>
+                    <div class="flag-pure">${s.emoji}</div>
                     <div class="info">
                         <b>${s.country}</b>
                         <span>${s.name}</span>
                         <small>${s.song}</small>
                     </div>
                     ${pts ? `<div class="pts-badge">${pts}</div>` : ''}
-                    <div class="artist-img-slot"><img src="${s.img}"></div>
+                    <div class="artist-img-slot">${s.img ? `<img src="${s.img}">` : ''}</div>
                 </div>`;
+            wrap.onclick = () => editArtist(s.id);
+            applyLongPress(wrap, () => { if(confirm('Artist löschen?')) deleteArtist(s.id); });
             list.appendChild(wrap);
         });
     }
 
-    function handleSwipe(el, e) {
-        let diff = startX - e.touches[0].clientX;
-        if(diff > 50) el.style.transform = "translateX(-130px)";
-        if(diff < -50) el.style.transform = "translateX(0)";
+    function deleteArtist(id) {
+        let shows = JSON.parse(localStorage.getItem('esc_v5'));
+        const sIdx = shows.findIndex(s => s.id === currentShowId);
+        shows[sIdx].songs = shows[sIdx].songs.filter(x => x.id !== id);
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        renderSongs();
+    }
+
+    function resetAlphabetical() {
+        let shows = JSON.parse(localStorage.getItem('esc_v5'));
+        const sIdx = shows.findIndex(s => s.id === currentShowId);
+        shows[sIdx].songs.sort((a,b) => a.country.localeCompare(b.country));
+        shows[sIdx].isRanked = false;
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        renderSongs();
+    }
+
+    // LOGIC: COMMUNITY
+    function saveComm() {
+        let shows = JSON.parse(localStorage.getItem('esc_v5'));
+        const sIdx = shows.findIndex(s => s.id === currentShowId);
+        const editId = document.getElementById('edit-comm-id').value;
+        const data = {
+            id: editId ? parseInt(editId) : Date.now(),
+            country: document.getElementById('c-country').value,
+            emoji: document.getElementById('c-emoji').value,
+            pts: parseInt(document.getElementById('c-pts').value) || 0
+        };
+        if(editId) {
+            const cIdx = shows[sIdx].community.findIndex(x => x.id == editId);
+            shows[sIdx].community[cIdx] = data;
+        } else {
+            shows[sIdx].community.push(data);
+        }
+        localStorage.setItem('esc_v5', JSON.stringify(shows));
+        resetForm('view-community');
+        renderComm();
+    }
+
+    function renderComm() {
+        const list = document.getElementById('community-list');
+        const show = JSON.parse(localStorage.getItem('esc_v5')).find(s => s.id === currentShowId);
+        list.innerHTML = '';
+        show.community.sort((a,b) => b.pts - a.pts).forEach((c, i) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'item-container';
+            wrap.innerHTML = `
+                <div class="item" style="height:70px; background:var(--blue-grad);">
+                    <div class="rank-num">${i+1}</div>
+                    <div class="flag-pure" style="font-size:24px;">${c.emoji}</div>
+                    <div class="info"><b>${c.country}</b></div>
+                    <div class="pts-badge" style="display:flex; border-radius:20px; width:auto; padding:0 12px; border-color:var(--gold-accent); color:white;">${c.pts.toLocaleString()}</div>
+                </div>`;
+            wrap.onclick = () => editComm(c.id);
+            applyLongPress(wrap, () => { if(confirm('Eintrag löschen?')) { 
+                let shows = JSON.parse(localStorage.getItem('esc_v5'));
+                const sIdx = shows.findIndex(s => s.id === currentShowId);
+                shows[sIdx].community = shows[sIdx].community.filter(x => x.id !== c.id);
+                localStorage.setItem('esc_v5', JSON.stringify(shows));
+                renderComm();
+            }});
+            list.appendChild(wrap);
+        });
     }
 
     function editArtist(id) {
-        const show = JSON.parse(localStorage.getItem('esc_v3')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_v5')).find(s => s.id === currentShowId);
         const s = show.songs.find(x => x.id === id);
         document.getElementById('edit-artist-id').value = s.id;
         document.getElementById('in-country').value = s.country;
@@ -272,56 +301,8 @@
         document.getElementById('artist-form').scrollIntoView();
     }
 
-    function deleteArtist(id) {
-        let shows = JSON.parse(localStorage.getItem('esc_v3'));
-        const sIdx = shows.findIndex(s => s.id === currentShowId);
-        shows[sIdx].songs = shows[sIdx].songs.filter(x => x.id !== id);
-        localStorage.setItem('esc_v3', JSON.stringify(shows));
-        renderSongs();
-    }
-
-    function saveComm() {
-        let shows = JSON.parse(localStorage.getItem('esc_v3'));
-        const sIdx = shows.findIndex(s => s.id === currentShowId);
-        const editId = document.getElementById('edit-comm-id').value;
-        const data = {
-            id: editId ? parseInt(editId) : Date.now(),
-            country: document.getElementById('c-country').value,
-            emoji: document.getElementById('c-emoji').value,
-            pts: parseInt(document.getElementById('c-pts').value)
-        };
-        if(editId) {
-            const cIdx = shows[sIdx].community.findIndex(x => x.id == editId);
-            shows[sIdx].community[cIdx] = data;
-        } else {
-            shows[sIdx].community.push(data);
-        }
-        localStorage.setItem('esc_v3', JSON.stringify(shows));
-        renderComm();
-        document.querySelectorAll('#view-community input').forEach(i => i.value='');
-    }
-
-    function renderComm() {
-        const list = document.getElementById('community-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v3') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
-        list.innerHTML = '';
-        if(!show) return;
-        show.community.sort((a,b) => b.pts - a.pts).forEach((c, i) => {
-            const div = document.createElement('div');
-            div.style = "display:flex; align-items:center; background:var(--blue-grad); margin:3px; padding:10px; border-radius:5px;";
-            div.innerHTML = `
-                <div style="width:25px; font-weight:bold;">${i+1}</div>
-                <div class="flag-pure" style="font-size:22px; width:40px;">${c.emoji}</div>
-                <div style="flex:1; font-weight:bold; text-transform:uppercase; color:var(--gold-accent);">${c.country}</div>
-                <div class="pts-badge" style="display:flex; border-color:#3498db; color:#3498db;">${c.pts.toLocaleString()}</div>
-                <div style="margin-left:10px;"><span onclick="editComm(${c.id})">📝</span></div>`;
-            list.appendChild(div);
-        });
-    }
-
     function editComm(id) {
-        const show = JSON.parse(localStorage.getItem('esc_v3')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_v5')).find(s => s.id === currentShowId);
         const c = show.community.find(x => x.id === id);
         document.getElementById('edit-comm-id').value = c.id;
         document.getElementById('c-country').value = c.country;
@@ -329,34 +310,21 @@
         document.getElementById('c-pts').value = c.pts;
     }
 
-    function deleteShow(id) {
-        let shows = JSON.parse(localStorage.getItem('esc_v3'));
-        shows = shows.filter(s => s.id !== id);
-        localStorage.setItem('esc_v3', JSON.stringify(shows));
-        renderShows();
-    }
-
-    function saveTop() {
-        const t = document.getElementById('toast');
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 1500);
-    }
-
-    function resetArtistForm() {
-        document.getElementById('edit-artist-id').value = '';
-        document.querySelectorAll('#artist-form input').forEach(i => i.value='');
+    function resetForm(parentId) {
+        if(parentId === 'artist-form') document.getElementById('edit-artist-id').value = '';
+        if(parentId === 'view-community') document.getElementById('edit-comm-id').value = '';
+        document.querySelectorAll(`#${parentId} input`).forEach(i => i.value = '');
     }
 
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
         onEnd: () => {
-            let shows = JSON.parse(localStorage.getItem('esc_v3'));
+            let shows = JSON.parse(localStorage.getItem('esc_v5'));
             const sIdx = shows.findIndex(s => s.id === currentShowId);
             shows[sIdx].isRanked = true;
-            const items = Array.from(document.querySelectorAll('#ranking-list .item-container'));
-            const newOrder = items.map(el => parseInt(el.querySelector('.btn-edit').getAttribute('onclick').match(/\d+/)[0]));
-            shows[sIdx].songs.sort((a,b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
-            localStorage.setItem('esc_v3', JSON.stringify(shows));
+            const itemCountries = Array.from(document.querySelectorAll('#ranking-list .info b')).map(b => b.innerText);
+            shows[sIdx].songs.sort((a,b) => itemCountries.indexOf(a.country) - itemCountries.indexOf(b.country));
+            localStorage.setItem('esc_v5', JSON.stringify(shows));
             renderSongs();
         }
     });
