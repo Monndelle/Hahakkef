@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimonESC - Ultra Stable Fix</title>
+    <title>SimonESC - Final with Backup</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root { 
@@ -44,11 +44,12 @@
         .artist-img-slot { width: 100px; height: 100%; position: absolute; right: 0; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: #000; z-index: 1; }
         .artist-img-slot img { width: 100%; height: 100%; object-fit: cover; }
 
-        .btn-reset { width: 100%; max-width: 500px; padding: 12px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid #333; border-radius: 25px; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; font-size: 0.75rem; flex-shrink: 0; }
-
         .input-group { background: #111; padding: 15px; border-radius: 10px; width: 95%; max-width: 500px; margin: 15px 0; border: 1px solid #222; flex-shrink: 0; }
         input { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 4px; background: #222; color: white; box-sizing: border-box; }
         .btn-main { width: 100%; padding: 15px; border: none; border-radius: 30px; font-weight: bold; text-transform: uppercase; cursor: pointer; }
+
+        .backup-bar { width: 100%; max-width: 500px; display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-small { flex: 1; padding: 8px; font-size: 0.7rem; background: #222; border: 1px solid #444; color: #ccc; border-radius: 5px; font-weight: bold; }
 
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 70px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 100; }
         .nav-btn { background: none; border: none; color: #555; font-size: 0.75rem; font-weight: bold; padding: 10px; }
@@ -64,6 +65,12 @@
 </div>
 
 <div id="view-shows" class="view active">
+    <div class="backup-bar">
+        <button class="btn-small" onclick="exportBackup()">💾 BACKUP SPEICHERN</button>
+        <button class="btn-small" onclick="document.getElementById('importFile').click()">📂 IMPORT</button>
+        <input type="file" id="importFile" style="display:none" onchange="importBackup(this)">
+    </div>
+
     <div class="input-group">
         <input type="text" id="new-show-name" placeholder="Name der Show">
         <button onclick="addShow()" class="btn-main" style="background:var(--gold-accent); margin-top:10px;">SHOW ERSTELLEN</button>
@@ -72,7 +79,7 @@
 </div>
 
 <div id="view-ranking" class="view">
-    <button class="btn-reset" onclick="resetAlphabetical()">Reset to Alphabetically</button>
+    <button onclick="resetAlphabetical()" style="width:100%; max-width:500px; padding:10px; background:none; border:1px solid #333; color:#666; border-radius:20px; margin-bottom:10px; font-size:0.7rem;">RESET TO ALPHABETICAL</button>
     <div id="ranking-list" style="width:100%; display: flex; flex-direction: column; align-items: center;"></div>
     
     <div class="input-group" id="artist-form">
@@ -108,10 +115,42 @@
 </div>
 
 <script>
+    const STORAGE_KEY = 'esc_vFINAL';
     let currentShowId = null;
     let longPressTimer;
     const ptsMap = {1:12, 2:10, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2, 10:1};
 
+    // --- BACKUP LOGIK ---
+    function exportBackup() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if(!data) return alert("Keine Daten zum Sichern vorhanden!");
+        const blob = new Blob([data], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `SimonESC_Backup_${new Date().toLocaleDateString()}.json`;
+        a.click();
+    }
+
+    function importBackup(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const content = e.target.result;
+                JSON.parse(content); // Teste ob es valides JSON ist
+                if(confirm("Bestehende Daten überschreiben?")) {
+                    localStorage.setItem(STORAGE_KEY, content);
+                    renderShows();
+                    alert("Backup erfolgreich geladen!");
+                }
+            } catch(err) { alert("Fehlerhafte Backup-Datei!"); }
+        };
+        reader.readAsText(file);
+    }
+
+    // --- APP LOGIK ---
     function showView(id, btn) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -132,36 +171,36 @@
     function addShow() {
         const name = document.getElementById('new-show-name').value;
         if(!name) return;
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL') || '[]');
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         shows.push({id: Date.now(), name, songs: [], community: [], isRanked: false});
-        localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
         document.getElementById('new-show-name').value = '';
         renderShows();
     }
 
     function renderShows() {
         const container = document.getElementById('show-container');
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL') || '[]');
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         container.innerHTML = '';
         shows.forEach(s => {
             const div = document.createElement('div');
             div.className = 'item-container';
             div.innerHTML = `<div class="item" style="padding:15px; border-left:4px solid var(--gold-accent);"><b>${s.name}</b></div>`;
             div.onclick = () => openShow(s.id);
-            applyLongPress(div, () => { if(confirm('Show löschen?')) { shows = shows.filter(x => x.id !== s.id); localStorage.setItem('esc_vFINAL', JSON.stringify(shows)); renderShows(); }});
+            applyLongPress(div, () => { if(confirm('Show löschen?')) { shows = shows.filter(x => x.id !== s.id); localStorage.setItem(STORAGE_KEY, JSON.stringify(shows)); renderShows(); }});
             container.appendChild(div);
         });
     }
 
     function openShow(id) {
         currentShowId = id;
-        const shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+        const shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
         document.getElementById('header-title').innerText = shows.find(s => s.id === id).name;
         showView('view-ranking');
     }
 
     async function saveArtist() {
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         const editId = document.getElementById('edit-artist-id').value;
         const file = document.getElementById('in-file').files[0];
@@ -191,23 +230,22 @@
             shows[sIdx].songs.push(data);
         }
 
-        localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
         resetForm('artist-form');
         renderSongs();
     }
 
     function renderSongs() {
         const list = document.getElementById('ranking-list');
-        const show = JSON.parse(localStorage.getItem('esc_vFINAL')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem(STORAGE_KEY)).find(s => s.id === currentShowId);
         list.innerHTML = '';
         list.className = show.isRanked ? 'is-ranked' : '';
 
         show.songs.forEach((s, i) => {
             const rank = i + 1;
-            const pts = ptsMap[rank] || '';
             const wrap = document.createElement('div');
             wrap.className = 'item-container';
-            wrap.dataset.id = s.id; // WICHTIG FÜR SORTIERUNG
+            wrap.dataset.id = s.id;
             wrap.innerHTML = `
                 <div class="item ${rank <= 3 ? 'rank-'+rank : ''}">
                     <div class="rank-num">${show.isRanked ? rank : '-'}</div>
@@ -217,7 +255,7 @@
                         <span>${s.name}</span>
                         <small>${s.song}</small>
                     </div>
-                    ${pts ? `<div class="pts-badge">${pts}</div>` : ''}
+                    ${ptsMap[rank] ? `<div class="pts-badge">${ptsMap[rank]}</div>` : ''}
                     <div class="artist-img-slot">${s.img ? `<img src="${s.img}">` : ''}</div>
                 </div>`;
             wrap.onclick = () => editArtist(s.id);
@@ -227,24 +265,24 @@
     }
 
     function deleteArtist(id) {
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         shows[sIdx].songs = shows[sIdx].songs.filter(x => x.id !== id);
-        localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
         renderSongs();
     }
 
     function resetAlphabetical() {
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         shows[sIdx].songs.sort((a,b) => a.country.localeCompare(b.country));
         shows[sIdx].isRanked = false;
-        localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
         renderSongs();
     }
 
     function saveComm() {
-        let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+        let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         const editId = document.getElementById('edit-comm-id').value;
         const data = {
@@ -259,31 +297,30 @@
         } else {
             shows[sIdx].community.push(data);
         }
-        localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
         resetForm('view-community');
         renderComm();
     }
 
     function renderComm() {
         const list = document.getElementById('community-list');
-        const show = JSON.parse(localStorage.getItem('esc_vFINAL')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem(STORAGE_KEY)).find(s => s.id === currentShowId);
         list.innerHTML = '';
         show.community.sort((a,b) => b.pts - a.pts).forEach((c, i) => {
             const wrap = document.createElement('div');
             wrap.className = 'item-container';
-            wrap.innerHTML = `
-                <div class="item" style="height:75px; background:var(--blue-grad);">
-                    <div class="rank-num">${i+1}</div>
-                    <div class="flag-pure" style="font-size:24px;">${c.emoji}</div>
-                    <div class="info"><b>${c.country}</b></div>
-                    <div class="pts-badge" style="display:flex; border-radius:20px; width:auto; padding:0 12px; border-color:var(--gold-accent); color:white;">${c.pts.toLocaleString()}</div>
-                </div>`;
+            wrap.innerHTML = `<div class="item" style="height:75px; background:var(--blue-grad);">
+                <div class="rank-num">${i+1}</div>
+                <div class="flag-pure">${c.emoji}</div>
+                <div class="info"><b>${c.country}</b></div>
+                <div class="pts-badge" style="display:flex; border-radius:20px; width:auto; padding:0 12px; border-color:var(--gold-accent);">${c.pts.toLocaleString()}</div>
+            </div>`;
             wrap.onclick = () => editComm(c.id);
-            applyLongPress(wrap, () => { if(confirm('Löschen?')) { 
-                let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+            applyLongPress(wrap, () => { if(confirm('Löschen?')) {
+                let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
                 const sIdx = shows.findIndex(s => s.id === currentShowId);
                 shows[sIdx].community = shows[sIdx].community.filter(x => x.id !== c.id);
-                localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
                 renderComm();
             }});
             list.appendChild(wrap);
@@ -291,7 +328,7 @@
     }
 
     function editArtist(id) {
-        const show = JSON.parse(localStorage.getItem('esc_vFINAL')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem(STORAGE_KEY)).find(s => s.id === currentShowId);
         const s = show.songs.find(x => x.id === id);
         document.getElementById('edit-artist-id').value = s.id;
         document.getElementById('in-country').value = s.country;
@@ -301,7 +338,7 @@
     }
 
     function editComm(id) {
-        const show = JSON.parse(localStorage.getItem('esc_vFINAL')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem(STORAGE_KEY)).find(s => s.id === currentShowId);
         const c = show.community.find(x => x.id === id);
         document.getElementById('edit-comm-id').value = c.id;
         document.getElementById('c-country').value = c.country;
@@ -315,25 +352,15 @@
         document.querySelectorAll(`#${parentId} input`).forEach(i => i.value = '');
     }
 
-    // DER ENTSCHEIDENDE FIX: SORTIERUNG ÜBER DATA-ID
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
         onEnd: function() {
-            let shows = JSON.parse(localStorage.getItem('esc_vFINAL'));
+            let shows = JSON.parse(localStorage.getItem(STORAGE_KEY));
             const sIdx = shows.findIndex(s => s.id === currentShowId);
             shows[sIdx].isRanked = true;
-            
-            // Hole alle IDs in der neuen DOM-Reihenfolge
-            const newOrderIds = Array.from(document.querySelectorAll('#ranking-list .item-container'))
-                                     .map(el => parseInt(el.dataset.id));
-            
-            // Baue die Liste basierend auf den IDs neu zusammen
-            const reorderedSongs = newOrderIds.map(id => {
-                return shows[sIdx].songs.find(song => song.id === id);
-            }).filter(song => song !== undefined); // Sicherheitscheck
-            
-            shows[sIdx].songs = reorderedSongs;
-            localStorage.setItem('esc_vFINAL', JSON.stringify(shows));
+            const newOrderIds = Array.from(document.querySelectorAll('#ranking-list .item-container')).map(el => parseInt(el.dataset.id));
+            shows[sIdx].songs = newOrderIds.map(id => shows[sIdx].songs.find(song => song.id === id)).filter(s => s);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(shows));
             renderSongs();
         }
     });
@@ -341,4 +368,5 @@
     renderShows();
 </script>
 </body>
-</html>
+    </html>
+    
