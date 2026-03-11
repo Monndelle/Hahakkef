@@ -3,88 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Custom Scoreboard</title>
+    <title>My Offline Scoreboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
+        :root {
+            --esc-blue: linear-gradient(90deg, #0a1931 0%, #185adb 100%);
+            --esc-gold: #c8a45e;
+        }
         body {
-            background-color: #000033; /* ESC Dunkelblau */
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            background-color: #050a18; color: white;
+            font-family: 'Trebuchet MS', sans-serif;
+            display: flex; flex-direction: column; align-items: center; padding: 10px; margin: 0;
         }
-        h1 { color: #ffcc00; text-shadow: 2px 2px 10px rgba(255,204,0,0.5); }
-        .input-area { margin-bottom: 20px; }
-        input { padding: 10px; border-radius: 5px; border: none; width: 200px; }
-        button { padding: 10px; background: #ffcc00; border: none; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        .header { width: 100%; max-width: 500px; padding: 20px; background: black; border-bottom: 3px solid var(--esc-gold); margin-bottom: 10px; }
         
-        #ranking-list {
-            list-style: none;
-            padding: 0;
-            width: 100%;
-            max-width: 400px;
-            counter-reset: rank-counter;
+        .input-panel { 
+            background: #111; padding: 15px; border-radius: 10px; width: 95%; max-width: 470px; margin-bottom: 20px;
+            display: flex; flex-direction: column; gap: 10px;
         }
-        .rank-item {
-            background: rgba(255, 255, 255, 0.1);
-            margin: 8px 0;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            border-radius: 10px;
-            cursor: grab;
-            border-left: 5px solid #ffcc00;
-            transition: transform 0.2s;
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input[type="text"] { padding: 10px; border-radius: 5px; border: none; background: #222; color: white; }
+        .file-label { font-size: 0.8rem; color: var(--esc-gold); margin-top: 5px; }
+        button#add-btn { padding: 12px; background: var(--esc-gold); border: none; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 10px; }
+
+        #ranking-list { list-style: none; padding: 0; width: 100%; max-width: 500px; }
+        
+        .item {
+            background: var(--esc-blue); margin-bottom: 8px;
+            display: flex; align-items: center; height: 100px;
+            position: relative; overflow: hidden;
         }
-        .rank-item::before {
-            counter-increment: rank-counter;
-            content: counter(rank-counter);
-            background: #ffcc00;
-            color: #000;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            margin-right: 15px;
-            font-weight: bold;
+        .flag { width: 60px; height: 40px; object-fit: cover; margin-left: 10px; transform: skewX(-10deg); border: 1px solid white; }
+        .info { flex-grow: 1; margin-left: 15px; }
+        .info .country { font-weight: bold; color: var(--esc-gold); text-transform: uppercase; display: block; }
+        .info .artist { font-size: 1.1rem; font-weight: bold; display: block; }
+        .info .song { font-size: 0.8rem; opacity: 0.8; }
+
+        .points-badge {
+            background: rgba(255,255,255,0.2); width: 45px; height: 45px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2rem; margin: 0 10px; border: 2px solid white;
         }
-        .rank-item:active { cursor: grabbing; transform: scale(1.02); }
+
+        .artist-img-container {
+            width: 110px; height: 100%; position: relative;
+            clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); background: #000;
+        }
+        .artist-img { width: 100%; height: 100%; object-fit: cover; }
+        .play-btn {
+            position: absolute; right: 35px; top: 35px; background: white; color: black;
+            width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .del-item { position: absolute; top: 5px; left: 5px; background: rgba(255,0,0,0.7); color: white; border: none; border-radius: 3px; cursor: pointer; z-index: 10; }
     </style>
 </head>
 <body>
 
-    <h1>My Personal Scoreboard</h1>
+<div class="header">
+    <div style="color:var(--esc-gold); font-weight:bold;">MY CUSTOM <span style="color:white">RANKING</span></div>
+</div>
 
-    <div class="input-area">
-        <input type="text" id="artist-name" placeholder="Name eingeben...">
-        <button onclick="addItem()">Hinzufügen</button>
+<div class="input-panel">
+    <div class="input-row">
+        <input type="text" id="in-country" placeholder="Land">
+        <input type="text" id="in-artist" placeholder="Sänger">
     </div>
+    <input type="text" id="in-song" placeholder="Song Name">
+    
+    <label class="file-label">Flagge wählen: <input type="file" id="file-flag" accept="image/*"></label>
+    <label class="file-label">Künstlerbild: <input type="file" id="file-img" accept="image/*"></label>
+    <label class="file-label">Audio (MP3): <input type="file" id="file-audio" accept="audio/*"></label>
+    
+    <button id="add-btn" onclick="processAndAdd()">Eintrag hinzufügen</button>
+</div>
 
-    <ul id="ranking-list">
-        </ul>
+<ul id="ranking-list"></ul>
 
-    <script>
-        function addItem() {
-            const name = document.getElementById('artist-name').value;
-            if (name === '') return;
-            
-            const li = document.createElement('li');
-            li.className = 'rank-item';
-            li.textContent = name;
-            
-            document.getElementById('ranking-list').appendChild(li);
-            document.getElementById('artist-name').value = '';
-        }
+<script>
+    const list = document.getElementById('ranking-list');
+    const pointsArr = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+    let currentAudio = null;
 
-        // Macht die Liste sortierbar (Drag & Drop)
-        new Sortable(document.getElementById('ranking-list'), {
-            animation: 150,
-            ghostClass: 'blue-background-class'
+    // Hilfsfunktion um Dateien in Text (Base64) zu verwandeln
+    const toBase64 = file => new Promise((resolve, reject) => {
+        if(!file) resolve(null);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    async function processAndAdd() {
+        const btn = document.getElementById('add-btn');
+        btn.textContent = "Lädt...";
+        btn.disabled = true;
+
+        const flagFile = document.getElementById('file-flag').files[0];
+        const imgFile = document.getElementById('file-img').files[0];
+        const audioFile = document.getElementById('file-audio').files[0];
+
+        const data = {
+            country: document.getElementById('in-country').value,
+            artist: document.getElementById('in-artist').value,
+            song: document.getElementById('in-song').value,
+            flag: await toBase64(flagFile) || 'https://via.placeholder.com/60x40',
+            img: await toBase64(imgFile) || 'https://via.placeholder.com/110x100',
+            audio: await toBase64(audioFile)
+        };
+
+        createItem(data);
+        save();
+        
+        // Reset Inputs
+        document.querySelectorAll('input').forEach(i => i.value = '');
+        btn.textContent = "Eintrag hinzufügen";
+        btn.disabled = false;
+    }
+
+    function createItem(d) {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.innerHTML = `
+            <button class="del-item" onclick="this.parentElement.remove(); save();">X</button>
+            <img class="flag" src="${d.flag}">
+            <div class="info">
+                <span class="country">${d.country}</span>
+                <span class="artist">${d.artist}</span>
+                <span class="song">${d.song}</span>
+            </div>
+            <div class="points-badge">0</div>
+            <div class="artist-img-container">
+                <img class="artist-img" src="${d.img}">
+                ${d.audio ? `<div class="play-btn" onclick="playAudio('${d.artist}')">▶</div>` : ''}
+            </div>
+            <span style="display:none" class="raw-data">${JSON.stringify(d)}</span>
+        `;
+        list.appendChild(li);
+        updatePoints();
+    }
+
+    function updatePoints() {
+        document.querySelectorAll('.item').forEach((item, index) => {
+            item.querySelector('.points-badge').textContent = pointsArr[index] || 0;
         });
-    </script>
+    }
+
+    function playAudio(artistName) {
+        if(currentAudio) currentAudio.pause();
+        const items = JSON.parse(localStorage.getItem('escScoreboard') || '[]');
+        const entry = items.find(i => i.artist === artistName);
+        if(entry && entry.audio) {
+            currentAudio = new Audio(entry.audio);
+            currentAudio.play();
+        }
+    }
+
+    function save() {
+        updatePoints();
+        const items = Array.from(document.querySelectorAll('.raw-data')).map(s => JSON.parse(s.textContent));
+        try {
+            localStorage.setItem('escScoreboard', JSON.stringify(items));
+        } catch(e) {
+            alert("Speicher voll! Lösche ein paar Einträge oder nutze kleinere Bilder.");
+        }
+    }
+
+    new Sortable(list, { animation: 150, onEnd: save });
+
+    const saved = localStorage.getItem('escScoreboard');
+    if(saved) JSON.parse(saved).forEach(d => createItem(d));
+</script>
+
 </body>
 </html>
