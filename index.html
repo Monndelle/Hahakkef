@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimonESC Ultimate</title>
+    <title>SimonESC Ultimate Final</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root { 
@@ -20,7 +20,6 @@
         .view { display: none; padding: 10px; flex-direction: column; align-items: center; }
         .active { display: flex; }
 
-        /* Song Card - Normal Flag Form */
         .item-container { position: relative; width: 100%; max-width: 500px; margin-bottom: 4px; border-radius: 6px; overflow: hidden; }
         .item { background: var(--blue-grad); display: flex; align-items: center; height: 90px; position: relative; z-index: 2; transition: transform 0.3s; }
         .item.rank-1 { background: var(--gold-grad); }
@@ -29,10 +28,8 @@
 
         .rank-num { width: 35px; text-align: center; font-weight: bold; font-size: 1rem; opacity: 0.7; }
         
-        /* Rechteckige Flagge */
-        .flag-box { width: 45px; height: 30px; overflow: hidden; border-radius: 3px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; margin: 0 10px; display: flex; align-items: center; justify-content: center; background: #111; }
-        .flag-box img { width: 100%; height: 100%; object-fit: cover; }
-        .flag-box span { font-size: 20px; }
+        /* Flagge pur - ohne Box */
+        .flag-pure { width: 45px; height: 45px; margin: 0 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 32px; }
 
         .info { flex-grow: 1; margin-left: 5px; overflow: hidden; white-space: nowrap; }
         .info b { display: block; text-transform: uppercase; font-size: 1rem; text-overflow: ellipsis; overflow: hidden; }
@@ -44,15 +41,13 @@
         .artist-img-slot { width: 85px; height: 100%; clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); background: #000; flex-shrink: 0; }
         .artist-img-slot img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Swipe Buttons */
         .swipe-actions { position: absolute; top: 0; right: 0; height: 100%; display: flex; z-index: 1; }
         .action-btn { width: 60px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border: none; }
         .btn-edit { background: #f39c12; }
         .btn-delete { background: #c0392b; }
 
-        /* UI Elements */
         .input-group { background: #111; padding: 15px; border-radius: 10px; width: 90%; margin: 15px 0; box-sizing: border-box; }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 4px; background: #222; color: white; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 4px; background: #222; color: white; box-sizing: border-box; font-size: 16px; }
         .btn-main { width: 94%; padding: 15px; border: none; border-radius: 30px; font-weight: bold; margin: 10px 0; cursor: pointer; text-transform: uppercase; }
         
         #toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); border: 2px solid var(--gold-accent); padding: 25px; border-radius: 15px; z-index: 1000; display: none; text-align: center; }
@@ -68,23 +63,21 @@
 
 <div class="app-header">
     <div style="font-weight:900; color:red; line-height:1;">SIMON<br>ESC</div>
-    <span id="header-title">Eurovision 2026</span>
+    <span id="header-title">Eurovision Manager</span>
     <div style="width:40px"></div>
 </div>
 
 <div id="view-shows" class="view active">
     <div class="input-group">
-        <input type="text" id="new-show-name" placeholder="z.B. 2026 Vienna">
-        <button onclick="addShow()" class="btn-main" style="background:var(--gold-accent); height:40px; padding:0;">SHOW ERSTELLEN</button>
+        <input type="text" id="new-show-name" placeholder="Name der Show eingeben...">
+        <button onclick="addShow()" class="btn-main" style="background:var(--gold-accent); height:45px; padding:0;">SHOW ERSTELLEN</button>
     </div>
     <div id="show-container" style="width:100%;"></div>
 </div>
 
 <div id="view-ranking" class="view">
     <button class="btn-main" style="background:#333; font-size:0.7rem; height:35px;" onclick="resetAlphabetical()">RESET TO ALPHABETICAL</button>
-    
     <div id="ranking-list" style="width:100%;"></div>
-
     <button class="btn-main" style="background:#6ab04c;" onclick="saveTop()">SAVE MY TOP</button>
 
     <div class="input-group" id="artist-form">
@@ -92,24 +85,23 @@
         <input type="hidden" id="edit-artist-id">
         <div style="display:flex; gap:5px;">
             <input type="text" id="in-country" placeholder="Land" style="width:70%;">
-            <input type="text" id="in-emoji" placeholder="🚩" style="width:30%;">
+            <input type="text" id="in-emoji" placeholder="Emoji" style="width:30%;">
         </div>
         <input type="text" id="in-artist" placeholder="Artist Name">
         <input type="text" id="in-song" placeholder="Song Name">
         <input type="file" id="in-file" style="font-size:0.7rem;">
-        <button onclick="saveArtist()" class="btn-main" style="background:var(--blue-grad); margin-top:10px;">ARTIST SPEICHERN</button>
+        <button onclick="saveArtist()" class="btn-main" style="background:var(--blue-grad); margin-top:10px;">SPEICHERN</button>
     </div>
 </div>
 
 <div id="view-community" class="view">
     <div id="community-list" style="width:100%;"></div>
-    
     <div class="input-group">
         <h3 style="margin:0 0 10px 0;">Community Score</h3>
         <input type="hidden" id="edit-comm-id">
         <input type="text" id="c-country" placeholder="Land">
-        <input type="text" id="c-emoji" placeholder="Flagge (Emoji)">
-        <input type="number" id="c-pts" placeholder="Punkte (z.B. 36006)">
+        <input type="text" id="c-emoji" placeholder="Emoji">
+        <input type="number" id="c-pts" placeholder="Punkte">
         <button onclick="saveComm()" class="btn-main" style="background:#185adb;">SCORE SPEICHERN</button>
     </div>
 </div>
@@ -134,44 +126,39 @@
         if(id === 'view-community') renderComm();
     }
 
-    // --- SHOWS ---
     function addShow() {
         const name = document.getElementById('new-show-name').value;
         if(!name) return;
-        let shows = JSON.parse(localStorage.getItem('esc_v6') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_final') || '[]');
         shows.push({id: Date.now(), name, songs: [], community: []});
-        localStorage.setItem('esc_v6', JSON.stringify(shows));
+        localStorage.setItem('esc_final', JSON.stringify(shows));
         document.getElementById('new-show-name').value = '';
         renderShows();
     }
 
     function renderShows() {
         const container = document.getElementById('show-container');
-        let shows = JSON.parse(localStorage.getItem('esc_v6') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_final') || '[]');
         container.innerHTML = '';
         shows.forEach(s => {
             const div = document.createElement('div');
             div.style = "background:#1a1a1a; margin:5px; padding:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;";
             div.innerHTML = `
-                <div onclick="openShow(${s.id})" style="flex-grow:1;"><b>${s.name}</b><br><small>${s.songs.length} Teilnehmer</small></div>
-                <div style="display:flex; gap:15px;">
-                    <span onclick="copyShow(${s.id})">📋</span>
-                    <span style="color:red" onclick="deleteShow(${s.id})">✕</span>
-                </div>`;
+                <div onclick="openShow(${s.id})" style="flex-grow:1;"><b>${s.name}</b><br><small>${s.songs.length} Artists</small></div>
+                <div style="display:flex; gap:15px;"><span style="color:red" onclick="deleteShow(${s.id})">✕</span></div>`;
             container.appendChild(div);
         });
     }
 
     function openShow(id) {
         currentShowId = id;
-        const shows = JSON.parse(localStorage.getItem('esc_v6') || '[]');
+        const shows = JSON.parse(localStorage.getItem('esc_final') || '[]');
         document.getElementById('header-title').innerText = shows.find(s => s.id === id).name;
         showView('view-ranking');
     }
 
-    // --- RANKING / ARTISTS ---
     async function saveArtist() {
-        let shows = JSON.parse(localStorage.getItem('esc_v6') || '[]');
+        let shows = JSON.parse(localStorage.getItem('esc_final') || '[]');
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         const editId = document.getElementById('edit-artist-id').value;
         const file = document.getElementById('in-file').files[0];
@@ -185,7 +172,7 @@
             });
         }
 
-        const artistData = {
+        const data = {
             id: editId ? parseInt(editId) : Date.now(),
             country: document.getElementById('in-country').value,
             emoji: document.getElementById('in-emoji').value,
@@ -196,19 +183,19 @@
 
         if(editId) {
             const aIdx = shows[sIdx].songs.findIndex(x => x.id == editId);
-            shows[sIdx].songs[aIdx] = artistData;
+            shows[sIdx].songs[aIdx] = data;
         } else {
-            shows[sIdx].songs.push(artistData);
+            shows[sIdx].songs.push(data);
         }
 
-        localStorage.setItem('esc_v6', JSON.stringify(shows));
+        localStorage.setItem('esc_final', JSON.stringify(shows));
         resetArtistForm();
         renderSongs();
     }
 
     function renderSongs() {
         const list = document.getElementById('ranking-list');
-        const show = JSON.parse(localStorage.getItem('esc_v6')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_final')).find(s => s.id === currentShowId);
         list.innerHTML = '';
         
         show.songs.forEach((s, i) => {
@@ -223,7 +210,7 @@
                 </div>
                 <div class="item ${rank <= 3 ? 'rank-'+rank : ''}" ontouchstart="startX=event.touches[0].clientX" ontouchmove="handleSwipe(this, event)">
                     <div class="rank-num">${rank}</div>
-                    <div class="flag-box">${s.emoji ? `<span>${s.emoji}</span>` : `<img src="https://flagcdn.com/w160/un.png">`}</div>
+                    <div class="flag-pure">${s.emoji || '🚩'}</div>
                     <div class="info">
                         <b>${s.country}</b>
                         <span>${s.name}</span>
@@ -243,76 +230,65 @@
     }
 
     function editArtist(id) {
-        const show = JSON.parse(localStorage.getItem('esc_v6')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_final')).find(s => s.id === currentShowId);
         const s = show.songs.find(x => x.id === id);
         document.getElementById('edit-artist-id').value = s.id;
         document.getElementById('in-country').value = s.country;
         document.getElementById('in-emoji').value = s.emoji;
         document.getElementById('in-artist').value = s.name;
         document.getElementById('in-song').value = s.song;
-        document.getElementById('form-title').innerText = "Artist bearbeiten";
         document.getElementById('artist-form').scrollIntoView();
     }
 
     function deleteArtist(id) {
-        let shows = JSON.parse(localStorage.getItem('esc_v6'));
+        let shows = JSON.parse(localStorage.getItem('esc_final'));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         shows[sIdx].songs = shows[sIdx].songs.filter(x => x.id !== id);
-        localStorage.setItem('esc_v6', JSON.stringify(shows));
+        localStorage.setItem('esc_final', JSON.stringify(shows));
         renderSongs();
     }
 
-    // --- COMMUNITY ---
     function saveComm() {
-        let shows = JSON.parse(localStorage.getItem('esc_v6'));
+        let shows = JSON.parse(localStorage.getItem('esc_final'));
         const sIdx = shows.findIndex(s => s.id === currentShowId);
         const editId = document.getElementById('edit-comm-id').value;
-
-        const commData = {
+        const data = {
             id: editId ? parseInt(editId) : Date.now(),
             country: document.getElementById('c-country').value,
             emoji: document.getElementById('c-emoji').value,
             pts: parseInt(document.getElementById('c-pts').value)
         };
-
         if(editId) {
             const cIdx = shows[sIdx].community.findIndex(x => x.id == editId);
-            shows[sIdx].community[cIdx] = commData;
+            shows[sIdx].community[cIdx] = data;
         } else {
-            shows[sIdx].community.push(commData);
+            shows[sIdx].community.push(data);
         }
-
-        localStorage.setItem('esc_v6', JSON.stringify(shows));
+        localStorage.setItem('esc_final', JSON.stringify(shows));
         renderComm();
-        document.getElementById('edit-comm-id').value = '';
         document.querySelectorAll('#view-community input').forEach(i => i.value='');
     }
 
     function renderComm() {
         const list = document.getElementById('community-list');
-        const show = JSON.parse(localStorage.getItem('esc_v6')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_final')).find(s => s.id === currentShowId);
         list.innerHTML = '';
         if(!show) return;
-
         show.community.sort((a,b) => b.pts - a.pts).forEach((c, i) => {
             const div = document.createElement('div');
-            div.style = "display:flex; align-items:center; background:var(--blue-grad); margin:3px; padding:10px; border-radius:5px; position:relative;";
+            div.style = "display:flex; align-items:center; background:var(--blue-grad); margin:3px; padding:10px; border-radius:5px;";
             div.innerHTML = `
                 <div style="width:25px; font-weight:bold;">${i+1}</div>
-                <div class="flag-box" style="width:35px; height:25px;"><span>${c.emoji}</span></div>
+                <div class="flag-pure" style="font-size:20px; width:35px;">${c.emoji}</div>
                 <div style="flex:1; font-weight:bold; text-transform:uppercase;">${c.country}</div>
                 <div class="pts-badge" style="border-radius:20px; width:auto; padding:0 10px; border-color:#3498db; color:#3498db;">${c.pts.toLocaleString()}</div>
-                <div style="margin-left:10px;">
-                    <span onclick="editComm(${c.id})">📝</span>
-                    <span onclick="deleteComm(${c.id})" style="margin-left:5px;">🗑️</span>
-                </div>
-            `;
+                <div style="margin-left:10px;"><span onclick="editComm(${c.id})">📝</span></div>`;
             list.appendChild(div);
         });
     }
 
     function editComm(id) {
-        const show = JSON.parse(localStorage.getItem('esc_v6')).find(s => s.id === currentShowId);
+        const show = JSON.parse(localStorage.getItem('esc_final')).find(s => s.id === currentShowId);
         const c = show.community.find(x => x.id === id);
         document.getElementById('edit-comm-id').value = c.id;
         document.getElementById('c-country').value = c.country;
@@ -320,15 +296,21 @@
         document.getElementById('c-pts').value = c.pts;
     }
 
-    function deleteComm(id) {
-        let shows = JSON.parse(localStorage.getItem('esc_v6'));
-        const sIdx = shows.findIndex(s => s.id === currentShowId);
-        shows[sIdx].community = shows[sIdx].community.filter(x => x.id !== id);
-        localStorage.setItem('esc_v6', JSON.stringify(shows));
-        renderComm();
+    function deleteShow(id) {
+        let shows = JSON.parse(localStorage.getItem('esc_final'));
+        shows = shows.filter(s => s.id !== id);
+        localStorage.setItem('esc_final', JSON.stringify(shows));
+        renderShows();
     }
 
-    // --- HELPER ---
+    function resetAlphabetical() {
+        let shows = JSON.parse(localStorage.getItem('esc_final'));
+        const sIdx = shows.findIndex(s => s.id === currentShowId);
+        shows[sIdx].songs.sort((a,b) => a.country.localeCompare(b.country));
+        localStorage.setItem('esc_final', JSON.stringify(shows));
+        renderSongs();
+    }
+
     function saveTop() {
         const t = document.getElementById('toast');
         t.style.display = 'block';
@@ -337,19 +319,18 @@
 
     function resetArtistForm() {
         document.getElementById('edit-artist-id').value = '';
-        document.getElementById('form-title').innerText = "Artist hinzufügen";
         document.querySelectorAll('#artist-form input').forEach(i => i.value='');
     }
 
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
         onEnd: () => {
-            let shows = JSON.parse(localStorage.getItem('esc_v6'));
+            let shows = JSON.parse(localStorage.getItem('esc_final'));
             const sIdx = shows.findIndex(s => s.id === currentShowId);
             const items = Array.from(document.querySelectorAll('#ranking-list .item-container'));
             const newOrder = items.map(el => parseInt(el.querySelector('.btn-edit').getAttribute('onclick').match(/\d+/)[0]));
             shows[sIdx].songs.sort((a,b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
-            localStorage.setItem('esc_v6', JSON.stringify(shows));
+            localStorage.setItem('esc_final', JSON.stringify(shows));
             renderSongs();
         }
     });
