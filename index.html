@@ -2,242 +2,293 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESC Pro Manager V3.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ESC Ultimate Manager</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --blue: linear-gradient(90deg, #0a1931 0%, #185adb 100%); --gold: #c8a45e; }
-        body { background: #050a18; color: white; font-family: sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
+        :root { --blue: linear-gradient(180deg, #0a1931 0%, #050a18 100%); --gold: #c8a45e; --item-grad: linear-gradient(90deg, #185adb 0%, #0a1931 100%); }
+        body { background: #050a18; color: white; font-family: sans-serif; margin: 0; padding-bottom: 90px; overflow-x: hidden; }
         .view { display: none; padding: 15px; flex-direction: column; align-items: center; }
         .active { display: flex; }
-        .app-header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; }
         
-        /* Diamond Flags */
-        .diamond { width: 50px; height: 50px; background: #333; transform: rotate(45deg); overflow: hidden; border: 2px solid #666; margin-left: 15px; flex-shrink: 0; }
-        .diamond img { width: 150%; height: 150%; transform: rotate(-45deg); object-fit: cover; }
-
-        .item-container { position: relative; margin-bottom: 8px; overflow: hidden; border-radius: 5px; width: 100%; max-width: 500px; }
-        .edit-btn { position: absolute; right: 0; top: 0; height: 100%; width: 80px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; z-index: 1; }
-        .item { background: var(--blue); display: flex; align-items: center; height: 95px; position: relative; z-index: 2; transition: 0.3s; width: 100%; }
-        .item.slid { transform: translateX(-80px); }
-        
-        .info { flex-grow: 1; margin-left: 25px; pointer-events: none; }
-        .info b { display: block; text-transform: uppercase; color: var(--gold); }
-
-        /* Artist Box & Play Button */
-        .artist-img-box { width: 110px; height: 100%; position: relative; clip-path: polygon(25% 0, 100% 0, 100% 100%, 0% 100%); background: #000; }
-        .artist-img { width: 100%; height: 100%; object-fit: cover; }
-        .yt-play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); color: white; text-decoration: none; font-size: 1.5rem; }
-
-        /* Points Circle (Top 10) */
-        .pts-circle { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; background: rgba(0,0,0,0.4); }
-
-        /* Banner Design */
-        .user-banner { width: 100%; max-width: 500px; background: black; display: flex; align-items: center; padding: 10px; margin-bottom: 15px; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); }
+        /* Header & Banner */
+        .app-header { background: #000; padding: 15px; border-bottom: 2px solid var(--gold); display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; }
+        .user-banner { width: 100%; max-width: 500px; background: black; display: flex; align-items: center; padding: 10px; margin-bottom: 15px; clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); border-left: 5px solid #e60000; }
         .user-logo { width: 45px; height: 45px; background: #e60000; color: white; border-radius: 5px; font-size: 10px; font-weight: bold; display: flex; align-items: center; justify-content: center; text-align: center; margin-right: 15px; }
 
-        .input-panel { background: #111; padding: 15px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; box-sizing: border-box; }
-        input, button { padding: 12px; border-radius: 5px; border: none; }
-        input { background: #222; color: #fff; border: 1px solid #444; }
-        .btn-green { background: #4caf50; color: white; font-weight: bold; cursor: pointer; width: 100%; max-width: 500px; padding: 15px; margin-top: 10px; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid var(--gold); }
+        /* Listen & Items */
+        #ranking-list, #community-list, #final-list { list-style: none; padding: 0; width: 100%; max-width: 500px; }
+        .item-container { position: relative; margin-bottom: 8px; cursor: grab; }
+        .edit-btn { position: absolute; right: 0; top: 0; height: 100%; width: 70px; background: var(--gold); color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 1; border-radius: 0 5px 5px 0; }
+        .item { background: var(--item-grad); display: flex; align-items: center; height: 90px; position: relative; z-index: 2; transition: 0.3s; border-radius: 5px; }
+        .item.slid { transform: translateX(-70px); }
+        
+        .rank-num { width: 30px; text-align: center; font-weight: bold; font-size: 1.1rem; margin-right: 10px; opacity: 0.7; }
+        .flag-box { width: 50px; height: 35px; border: 1px solid rgba(255,255,255,0.3); object-fit: cover; margin-left: 10px; flex-shrink: 0; }
+        .emoji-flag { font-size: 2rem; margin-left: 10px; width: 50px; text-align: center; }
+        .info { flex-grow: 1; margin-left: 15px; line-height: 1.2; }
+        .info b { display: block; text-transform: uppercase; color: #fff; font-size: 1.1rem; }
+        .info span { font-size: 0.85rem; color: #aaa; }
+
+        /* Points Badge */
+        .pts-badge { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; background: rgba(0,0,0,0.4); flex-shrink: 0; }
+
+        /* Artist Box */
+        .artist-box { width: 100px; height: 100%; position: relative; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%); background: #000; }
+        .artist-img { width: 100%; height: 100%; object-fit: cover; }
+        .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.1); color: white; text-decoration: none; font-size: 1.4rem; }
+
+        /* Inputs */
+        .input-panel { background: #111; padding: 15px; width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 8px; border-radius: 10px; margin-bottom: 15px; }
+        input { padding: 12px; background: #222; color: #fff; border: 1px solid #444; border-radius: 5px; }
+        .btn-main { padding: 12px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+
+        /* Nav */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--gold); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+        .nav-item { background: none; border: none; color: white; opacity: 0.5; font-weight: bold; font-size: 0.8rem; }
+        .nav-item.active-nav { opacity: 1; color: var(--gold); }
     </style>
 </head>
 <body>
 
 <div class="app-header">
-    <div style="font-weight:bold">2026 EUROVISION</div>
+    <div style="font-weight:bold; letter-spacing: 1px;">2026 EUROVISION</div>
     <div class="user-logo">SIMON<br>ESC</div>
 </div>
 
 <div id="view-shows" class="view active">
     <div class="input-panel">
-        <input type="text" id="new-show-name" placeholder="Name der neuen Show...">
-        <button onclick="addShow()" style="background:var(--gold); font-weight:bold">Show erstellen</button>
+        <input type="text" id="new-show-name" placeholder="Name der Show (z.B. 2026 Vienna)">
+        <button class="btn-main" onclick="addShow()" style="background:var(--gold); color:black;">Show erstellen</button>
     </div>
-    <div id="show-container" style="width:100%; display:flex; flex-direction:column; align-items:center; margin-top:20px;"></div>
+    <div id="show-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
 </div>
 
 <div id="view-ranking" class="view">
-    <div class="input-panel" id="add-song-panel">
+    <div class="input-panel">
         <input type="hidden" id="edit-id">
-        <input type="text" id="in-country" placeholder="Land (z.B. Germany)">
+        <input type="text" id="in-country" placeholder="Land">
         <input type="text" id="in-artist" placeholder="Künstler">
-        <input type="text" id="in-song" placeholder="Song Name">
+        <input type="text" id="in-song" placeholder="Song">
         <input type="text" id="in-yt" placeholder="YouTube Link">
-        <label style="font-size: 0.7rem; color: #aaa;">Bild:<input type="file" id="file-img" accept="image/*" style="margin-left:5px;"></label>
-        <button id="add-btn" onclick="saveItem()" style="background:var(--gold); font-weight:bold">Speichern</button>
-        <button onclick="resetToAlpha()" style="background:#444; color:white;">RESET TO ALPHABETICAL</button>
+        <input type="text" id="in-emoji" placeholder="Flagge als Emoji (optional)">
+        <label style="font-size:0.7rem;">Künstlerbild: <input type="file" id="in-file" accept="image/*"></label>
+        <button class="btn-main" onclick="saveSong()" style="background:var(--gold); color:black;">SPEICHERN</button>
+        <button class="btn-main" onclick="resetToAlpha()" style="background:#333; color:white; font-size:0.7rem;">RESET TO ALPHABETICAL</button>
     </div>
-    <ul id="ranking-list" style="list-style:none; padding:0; width:100%; max-width:500px;"></ul>
-    <button class="btn-green" style="border-radius:30px;" onclick="saveMyTop()">SAVE MY TOP</button>
+    <ul id="ranking-list"></ul>
+    <button class="btn-main" onclick="saveTop()" style="background:#4caf50; color:white; width:100%; max-width:500px; margin-top:20px;">SAVE MY TOP</button>
+</div>
+
+<div id="view-community" class="view">
+    <div class="user-banner">
+        <div class="user-logo">SIMON<br>ESC</div>
+        <b style="margin-left:10px;">Community Ranking</b>
+    </div>
+    <div class="input-panel">
+        <input type="text" id="c-country" placeholder="Land (Englisch für Auto-Flagge)">
+        <input type="number" id="c-pts" placeholder="Punkte">
+        <input type="text" id="c-emoji" placeholder="Emoji Flagge">
+        <button class="btn-main" onclick="addComm()" style="background:#185adb; color:white;">Eintragen</button>
+    </div>
+    <ul id="community-list"></ul>
 </div>
 
 <div id="view-final" class="view">
     <div class="user-banner">
         <div class="user-logo">SIMON<br>ESC</div>
-        <b style="font-size:1.2rem; margin-left:10px;">SimonESC</b>
+        <b style="margin-left:10px;">SimonESC</b>
     </div>
-    <ul id="final-list" style="list-style:none; padding:0; width:100%; max-width:500px;"></ul>
-    <button class="btn-green" style="border-radius:30px; background:#444;" onclick="showView('view-ranking')">EDIT MY TOP</button>
+    <ul id="final-list"></ul>
+    <button class="btn-main" onclick="showView('view-ranking')" style="background:#444; color:white; width:100%; max-width:500px;">EDIT MY TOP</button>
 </div>
 
 <div class="bottom-nav">
-    <button onclick="showView('view-shows')" style="background:none; color:white; border:none; font-weight:bold;">SHOWS</button>
-    <button onclick="showView('view-ranking')" style="background:none; color:var(--gold); border:none; font-weight:bold;">MY TOP</button>
+    <button class="nav-item" onclick="showView('view-shows')">SHOWS</button>
+    <button class="nav-item active-nav" onclick="showView('view-ranking')">MY TOP</button>
+    <button class="nav-item" onclick="showView('view-community')">COMMUNITY</button>
 </div>
 
 <script>
-    let currentShowId = null;
+    let shows = JSON.parse(localStorage.getItem('esc_final_v1') || '[]');
+    let currentId = null;
     let startX = 0;
-    const pts = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
-
-    function getFlagURL(country) {
-        if(!country) return '';
-        const map = {"germany":"de","croatia":"hr","finland":"fi","albania":"al","ukraine":"ua","austria":"at","sweden":"se","denmark":"dk","italy":"it","france":"fr","spain":"es","norway":"no"};
-        const c = country.trim().toLowerCase();
-        return map[c] ? `https://flagcdn.com/w160/${map[c]}.png` : `https://via.placeholder.com/50?text=?`;
-    }
+    const ptsTable = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
 
     function showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if(id === 'view-final') renderFinal();
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+        if(id === 'view-community') renderComm();
+        if(id === 'view-ranking') renderSongs();
     }
 
     function addShow() {
         const name = document.getElementById('new-show-name').value;
         if(!name) return;
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        shows.push({id: Date.now(), name, songs: []});
-        localStorage.setItem('esc_v5', JSON.stringify(shows));
-        renderShows();
+        const newShow = { id: Date.now(), name, songs: [], community: [] };
+        shows.push(newShow);
+        save(); renderShows();
     }
 
     function renderShows() {
-        const container = document.getElementById('show-container');
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        container.innerHTML = '';
+        const cont = document.getElementById('show-container');
+        cont.innerHTML = '';
         shows.forEach(s => {
-            const div = document.createElement('div');
-            div.style = "width:100%; max-width:500px; background:var(--blue); margin:5px 0; padding:15px; border-radius:5px; cursor:pointer;";
-            div.innerHTML = `<b>⭐ ${s.name}</b>`;
-            div.onclick = () => { currentShowId = s.id; renderSongs(); showView('view-ranking'); };
-            container.appendChild(div);
+            const d = document.createElement('div');
+            d.style = "width:100%; max-width:500px; background:var(--item-grad); padding:20px; margin:5px; border-radius:5px; cursor:pointer; font-weight:bold;";
+            d.innerHTML = `⭐ ${s.name}`;
+            d.onclick = () => { currentId = s.id; showView('view-ranking'); };
+            cont.appendChild(d);
         });
     }
 
-    async function saveItem() {
+    async function saveSong() {
+        const show = shows.find(s => s.id === currentId);
         const editId = document.getElementById('edit-id').value;
-        const imgFile = document.getElementById('file-img').files[0];
-        let imgBase64 = null;
-        if(imgFile) {
-            imgBase64 = await new Promise(r => {
+        const file = document.getElementById('in-file').files[0];
+        let img = "https://via.placeholder.com/100";
+
+        if(file) {
+            img = await new Promise(r => {
                 const reader = new FileReader();
                 reader.onload = () => r(reader.result);
-                reader.readAsDataURL(imgFile);
+                reader.readAsDataURL(file);
             });
         }
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
-        const songData = {
+
+        const data = {
             id: editId ? parseInt(editId) : Date.now(),
             country: document.getElementById('in-country').value,
             artist: document.getElementById('in-artist').value,
             song: document.getElementById('in-song').value,
             yt: document.getElementById('in-yt').value,
-            img: imgBase64 || (editId ? show.songs.find(s => s.id == editId).img : 'https://via.placeholder.com/110')
+            emoji: document.getElementById('in-emoji').value,
+            img: editId && !file ? show.songs.find(s => s.id == editId).img : img
         };
+
         if(editId) {
             const idx = show.songs.findIndex(s => s.id == editId);
-            show.songs[idx] = songData;
+            show.songs[idx] = data;
         } else {
-            show.songs.push(songData);
+            show.songs.push(data);
         }
-        localStorage.setItem('esc_v5', JSON.stringify(shows));
-        document.getElementById('edit-id').value = '';
-        document.querySelectorAll('#add-song-panel input').forEach(i => i.value = '');
-        renderSongs();
+        save(); clearInputs(); renderSongs();
     }
 
     function renderSongs() {
         const list = document.getElementById('ranking-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
+        const show = shows.find(s => s.id === currentId);
         list.innerHTML = '';
+        if(!show) return;
         show.songs.forEach((s, i) => {
-            const container = document.createElement('div');
-            container.className = 'item-container';
-            container.innerHTML = `
-                <div class="edit-btn" onclick="editSong(${s.id})">EDIT</div>
-                <div class="item" ontouchstart="startX=event.touches[0].clientX" ontouchmove="handleSlide(this, event)">
-                    <div class="diamond"><img src="${getFlagURL(s.country)}"></div>
-                    <div class="info"><b>${s.country}</b><span>${s.artist}</span></div>
-                    <div class="artist-img-box">
-                        <img src="${s.img}" class="artist-img">
-                        ${s.yt ? `<a href="${s.yt}" target="_blank" class="yt-play-overlay">▶</a>` : ''}
+            const p = ptsTable[i] ? `<div class="pts-badge">${ptsTable[i]}</div>` : '';
+            const flag = s.emoji ? `<div class="emoji-flag">${s.emoji}</div>` : `<img src="${getFlag(s.country)}" class="flag-box">`;
+            list.innerHTML += `
+                <div class="item-container" data-id="${s.id}">
+                    <div class="edit-btn" onclick="editSong(${s.id})">EDIT</div>
+                    <div class="item" ontouchstart="startX=event.touches[0].clientX" ontouchmove="handleSlide(this, event)">
+                        <div class="rank-num">${i+1}</div>
+                        ${flag}
+                        <div class="info"><b>${s.country}</b><span>${s.artist}</span></div>
+                        ${p}
+                        <div class="artist-box">
+                            <img src="${s.img}" class="artist-img">
+                            ${s.yt ? `<a href="${s.yt}" target="_blank" class="play-overlay">▶</a>` : ''}
+                        </div>
                     </div>
                 </div>`;
-            list.appendChild(container);
         });
     }
 
-    function handleSlide(el, e) {
-        let diff = startX - e.touches[0].clientX;
-        if(diff > 40) el.classList.add('slid');
-        if(diff < -40) el.classList.remove('slid');
-    }
-
     function editSong(id) {
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        const song = shows.find(s => s.id === currentShowId).songs.find(s => s.id === id);
-        document.getElementById('edit-id').value = song.id;
-        document.getElementById('in-country').value = song.country;
-        document.getElementById('in-artist').value = song.artist;
-        document.getElementById('in-song').value = song.song;
-        document.getElementById('in-yt').value = song.yt || '';
+        const show = shows.find(s => s.id === currentId);
+        const s = show.songs.find(x => x.id === id);
+        document.getElementById('edit-id').value = s.id;
+        document.getElementById('in-country').value = s.country;
+        document.getElementById('in-artist').value = s.artist;
+        document.getElementById('in-song').value = s.song;
+        document.getElementById('in-yt').value = s.yt;
+        document.getElementById('in-emoji').value = s.emoji || '';
         window.scrollTo(0,0);
     }
 
-    function resetToAlpha() {
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
-        show.songs.sort((a,b) => a.country.localeCompare(b.country));
-        localStorage.setItem('esc_v5', JSON.stringify(shows));
-        renderSongs();
+    function addComm() {
+        const show = shows.find(s => s.id === currentId);
+        const country = document.getElementById('c-country').value;
+        const pts = document.getElementById('c-pts').value;
+        const emoji = document.getElementById('c-emoji').value;
+        show.community.push({ country, pts: parseInt(pts), emoji });
+        save(); renderComm();
     }
 
-    function saveMyTop() {
-        alert("Saved successfully!");
-        showView('view-final');
+    function renderComm() {
+        const list = document.getElementById('community-list');
+        const show = shows.find(s => s.id === currentId);
+        list.innerHTML = '';
+        if(!show) return;
+        show.community.sort((a,b) => b.pts - a.pts).forEach((c, i) => {
+            const bg = i===0 ? 'gold' : (i===1 ? '#a0a0a0' : (i===2 ? '#cd7f32' : '#185adb'));
+            const flag = c.emoji ? `<div class="emoji-flag">${c.emoji}</div>` : `<img src="${getFlag(c.country)}" class="flag-box">`;
+            list.innerHTML += `
+                <div class="item" style="margin-bottom:5px; height:60px; background: rgba(24, 90, 219, 0.2); border-left: 5px solid ${bg}">
+                    <div class="rank-num">${i+1}</div>
+                    ${flag}
+                    <div class="info"><b>${c.country}</b></div>
+                    <div class="pts-badge" style="background:${bg}; color:black; border:none; border-radius:15px; width:auto; padding:0 10px;">${c.pts.toLocaleString()}</div>
+                </div>`;
+        });
     }
+
+    function saveTop() { alert("Saved successfully!"); showView('view-final'); renderFinal(); }
 
     function renderFinal() {
         const list = document.getElementById('final-list');
-        const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-        const show = shows.find(s => s.id === currentShowId);
+        const show = shows.find(s => s.id === currentId);
         list.innerHTML = '';
         show.songs.forEach((s, i) => {
-            const p = pts[i] ? `<div class="pts-circle">${pts[i]}</div>` : '';
-            const bg = i === 0 ? 'linear-gradient(90deg, #c8a45e, #0a1931)' : (i === 1 ? 'linear-gradient(90deg, #a0a0a0, #0a1931)' : (i === 2 ? 'linear-gradient(90deg, #cd7f32, #0a1931)' : 'var(--blue)'));
+            const p = ptsTable[i] ? `<div class="pts-badge">${ptsTable[i]}</div>` : '';
+            const bg = i===0 ? 'linear-gradient(90deg, #c8a45e, #0a1931)' : (i===1 ? 'linear-gradient(90deg, #a0a0a0, #0a1931)' : (i===2 ? 'linear-gradient(90deg, #cd7f32, #0a1931)' : 'var(--item-grad)'));
+            const flag = s.emoji ? `<div class="emoji-flag" style="font-size:1.5rem">${s.emoji}</div>` : `<img src="${getFlag(s.country)}" class="flag-box" style="width:35px; height:25px;">`;
             list.innerHTML += `
                 <div class="item" style="margin-bottom:5px; background:${bg}">
-                    <div style="width:30px; text-align:right; font-weight:bold; margin-right:10px">${i+1}</div>
-                    <div class="diamond" style="width:35px; height:35px;"><img src="${getFlagURL(s.country)}"></div>
+                    <div class="rank-num">${i+1}</div>
+                    ${flag}
                     <div class="info"><b>${s.country}</b></div>
                     ${p}
                 </div>`;
         });
     }
 
+    function handleSlide(el, e) {
+        let d = startX - e.touches[0].clientX;
+        if(d > 40) el.classList.add('slid');
+        if(d < -40) el.classList.remove('slid');
+    }
+
+    function resetToAlpha() {
+        const show = shows.find(s => s.id === currentId);
+        show.songs.sort((a,b) => a.country.localeCompare(b.country));
+        save(); renderSongs();
+    }
+
+    function getFlag(c) {
+        const m = {"germany":"de","croatia":"hr","finland":"fi","austria":"at","sweden":"se","denmark":"dk","italy":"it","france":"fr","albania":"al","ukraine":"ua"};
+        const code = m[c.toLowerCase()] || "un";
+        return `https://flagcdn.com/w160/${code}.png`;
+    }
+
+    function save() { localStorage.setItem('esc_final_v1', JSON.stringify(shows)); }
+    function clearInputs() { document.querySelectorAll('.input-panel input').forEach(i => i.value=''); document.getElementById('edit-id').value=''; }
+
     new Sortable(document.getElementById('ranking-list'), {
         animation: 150,
+        handle: '.item',
         onEnd: () => {
-            const shows = JSON.parse(localStorage.getItem('esc_v5') || '[]');
-            const show = shows.find(s => s.id === currentShowId);
-            const countries = Array.from(document.querySelectorAll('#ranking-list .info b')).map(b => b.innerText);
-            show.songs.sort((a,b) => countries.indexOf(a.country.toUpperCase()) - countries.indexOf(b.country.toUpperCase()));
-            localStorage.setItem('esc_v5', JSON.stringify(shows));
+            const show = shows.find(s => s.id === currentId);
+            const ids = Array.from(document.querySelectorAll('.item-container')).map(el => parseInt(el.dataset.id));
+            show.songs.sort((a,b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+            save(); renderSongs();
         }
     });
 
